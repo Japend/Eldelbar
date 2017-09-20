@@ -16,14 +16,11 @@ void loop() {
   
   // Your operations here
 
-  Serial.println("1");
-
-/*
   if (Serial.available() > 0)
     sCmd.readSerial();
 
   delay(50);  
-  */
+  
 }
 
 void pingHandler ()

@@ -10,7 +10,7 @@ public class ArduinoConnector : MonoBehaviour {
 
     /* The serial port where the Arduino is connected. */
     [Tooltip("The serial port where the Arduino is connected")]
-    public string port = "COM3";
+    public string port = "COM4";
     /* The baudrate of the serial port. */
     [Tooltip("The baudrate of the serial port")]
     public int baudrate = 9600;
@@ -23,6 +23,9 @@ public class ArduinoConnector : MonoBehaviour {
         stream.ReadTimeout = 50;
         stream.Open();
         //this.stream.DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);
+
+        
+
     }
 
     public void WriteToArduino(string message)
@@ -34,17 +37,9 @@ public class ArduinoConnector : MonoBehaviour {
 
     public void Update()
     {
-        //WriteToArduino("PING");
-        Debug.Log(ReadFromArduino(5));
+        WriteToArduino("PING");
+        Debug.Log(ReadFromArduino(5));        
 
-        /*
-        StartCoroutine(AsynchronousReadFromArduino
-             ((string s) => Debug.Log(s),     // Callback
-             () => Debug.LogError("Error!"), // Error callback
-             1f                           // Timeout (seconds)
-         )
-     );
-     */
     }
 
     public string ReadFromArduino(int timeout = 0)
