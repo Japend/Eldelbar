@@ -36,6 +36,11 @@ THE SOFTWARE.
 #include "I2Cdev.h"
 #include "MPU6050.h"
 
+#include <SerialCommand.h>
+#include <SoftwareSerial.h>
+
+SerialCommand sCmd;
+
 // Arduino Wire library is required if I2Cdev I2CDEV_ARDUINO_WIRE implementation
 // is used in I2Cdev.h
 #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
@@ -80,7 +85,7 @@ void setup() {
     // initialize serial communication
     // (38400 chosen because it works as well at 8MHz as it does at 16MHz, but
     // it's really up to you depending on your project)
-    Serial.begin(38400);
+    Serial.begin(9600);
 
     // initialize device
     Serial.println("Initializing I2C devices...");
@@ -115,6 +120,12 @@ void setup() {
 
     // configure Arduino LED for
     pinMode(LED_PIN, OUTPUT);
+
+    while (!Serial);
+
+    sCmd.addCommand("PING", pingHandler);
+    sCmd.addCommand("ECHO", echoHandler);
+    
 }
 
 void loop() {
@@ -129,11 +140,16 @@ void loop() {
         // display tab-separated accel/gyro x/y/z values
         Serial.print("a/g:\t");
         Serial.println(ax - 8300); //Serial.print("\t");
-        //Serial.print(ay); Serial.print("\t");
-        //Serial.print(az); Serial.print("\t");
-        //Serial.print(gx); Serial.print("\t");
-        //Serial.print(gy); Serial.print("\t");
-        //Serial.println(gz);
+        Serial.print(ay); Serial.print("\t");
+        Serial.print(az); Serial.print("\t");
+        Serial.print(gx); Serial.print("\t");
+        Serial.print(gy); Serial.print("\t");
+        Serial.println(gz);
+
+        if (Serial.available() > 0)
+            sCmd.readSerial();
+
+        
         delay(500);
     #endif
 
@@ -150,3 +166,20 @@ void loop() {
     blinkState = !blinkState;
     digitalWrite(LED_PIN, blinkState);
 }
+
+
+void pingHandler ()
+{
+  Serial.println(ax);
+}
+
+void echoHandler ()
+{
+  char *arg;
+  arg = sCmd.next();
+  if (arg != NULL)
+    Serial.println(arg);
+  else
+    Serial.println("nothing to echo");
+}
+
