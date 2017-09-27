@@ -73,6 +73,9 @@ float girosc_ang_z, girosc_ang_y;
 float girosc_ang_z_prev, girosc_ang_y_prev;
 
 
+float accel_ang_y, accel_ang_z;
+
+
 void setup() {
     // join I2C bus (I2Cdev library doesn't do this automatically)
     #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
@@ -117,8 +120,8 @@ void loop() {
         // display tab-separated accel/gyro x/y/z values
         
         Serial.print(ax); Serial.print(",");
-        Serial.print(ay); Serial.print(",");
-        Serial.print(az); Serial.print(",");
+        Serial.print(accel_ang_y); Serial.print(",");
+        Serial.print(accel_ang_z); Serial.print(",");
         Serial.print(girosc_ang_y); Serial.print(",");
         Serial.println(girosc_ang_z); //Serial.print(",");
         //Serial.println(gz);
@@ -143,4 +146,11 @@ void updateGiro()
    girosc_ang_z_prev = girosc_ang_z;
    girosc_ang_y_prev = girosc_ang_y;
 }
+
+void rotacionAcelerometro()
+{
+  accel_ang_y=atan(az/sqrt(pow(ay,2) + pow(ax,2)))*(180.0/3.14);
+  accel_ang_z=atan(ay/sqrt(pow(az,2) + pow(ax,2)))*(180.0/3.14);
+}
+
 
