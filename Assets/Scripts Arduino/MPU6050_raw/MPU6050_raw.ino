@@ -57,20 +57,25 @@ int16_t ax, ay, az;
 int16_t gx, gy, gz;
 
 
-// uncomment "OUTPUT_READABLE_ACCELGYRO" if you want to see a tab-separated
-// list of the accel X/Y/Z and then gyro X/Y/Z values in decimal. Easy to read,
-// not so easy to parse, and slow(er) over UART.
-#define OUTPUT_READABLE_ACCELGYRO
-
 
 #define LED_PIN 13
+
+/*comentar para usar la version sin filtro de complemento*/
+#define MODO_FILTRO_COMPLEMENTO
+
+
 bool blinkState = false;
 
 
 //variables para calcular orientacion a partir de datos del giroscopio
 long tiempo_prev, dt;
 float girosc_ang_z, girosc_ang_y;
-float girosc_ang_z_prev, girosc_ang_y_prev;
+float ang_z_prev, ang_y_prev;
+
+#ifdef MODO_FILTRO_COMPLEMENTO
+  float angulo_z_filtro_comp, angulo_y_filtro_comp;
+  float incremento_giroscopio_z, incremento_giroscopio_y;
+#endif
 
 
 float accel_ang_y, accel_ang_z;
@@ -103,6 +108,10 @@ void setup() {
     // configure Arduino LED for
     pinMode(LED_PIN, OUTPUT);
 
+    #ifdef MODO_FILTRO_COMPLEMENTO
+    //inicializa variables
+    ang_z_prev = ang_y_prev = 0;
+    #endif
 }
 
 void loop() {
@@ -111,19 +120,25 @@ void loop() {
     // read raw accel/gyro measurements from device
     accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
 
-    // these methods (and a few others) are also available
-    //accelgyro.getAcceleration(&ax, &ay, &az);
-    //accelgyro.getRotation(&gx, &gy, &gz);
-
     updateGiro();
-    #ifdef OUTPUT_READABLE_ACCELGYRO
+    rotacionAcelerometro();
+    
         // display tab-separated accel/gyro x/y/z values
-        
-        Serial.print(ax); Serial.print(",");
-        Serial.print(accel_ang_y); Serial.print(",");
-        Serial.print(accel_ang_z); Serial.print(",");
-        Serial.print(girosc_ang_y); Serial.print(",");
-        Serial.println(girosc_ang_z); //Serial.print(",");
+
+        #ifdef MODO_FILTRO_COMPLEMENTO
+        filtroComplemento();
+        Serial.print("ANGULOS CON FILTRO COMPEMENTO: \t");
+        Serial.print(angulo_y_filtro_comp); Serial.print(",");
+        Serial.println(angulo_z_filtro_comp); 
+
+        #else
+          Serial.print("ANGULOS SIN FILTRO COMPEMENTO: \t")
+          Serial.print(ax); Serial.print(",");
+          Serial.print(accel_ang_y); Serial.print(",");
+          Serial.print(accel_ang_z); Serial.print(",");
+          Serial.print(girosc_ang_y); Serial.print(",");
+          Serial.println(girosc_ang_z);
+        //Serial.print(",");
         //Serial.println(gz);
 
     #endif
@@ -135,22 +150,58 @@ void loop() {
     delay(100);
 }
 
-void updateGiro()
-{
-   dt = millis() - tiempo_prev;
-   tiempo_prev = millis();
- 
-   girosc_ang_z = (gz / 131)*dt / 1000.0 + girosc_ang_z_prev;
-   girosc_ang_y = (gy / 400)*dt / 1000.0 + girosc_ang_y_prev;
- 
-   girosc_ang_z_prev = girosc_ang_z;
-   girosc_ang_y_prev = girosc_ang_y;
-}
+ /*Esta funcion calcula la rotacion en los ejes a partir de la informacion del acalerometro,
+   * concretamente, de la aceleracion producida por la gravedad
+   */
+  void rotacionAcelerometro()
+  {
+    accel_ang_y=atan((az - 3700)/sqrt(pow(ay,2) + pow(ax,2)))*(180.0/3.14);
+    accel_ang_z=atan(ay/sqrt(pow(az,2) + pow(ax,2)))*(180.0/3.14);
+  }
 
-void rotacionAcelerometro()
-{
-  accel_ang_y=atan(az/sqrt(pow(ay,2) + pow(ax,2)))*(180.0/3.14);
-  accel_ang_z=atan(ay/sqrt(pow(az,2) + pow(ax,2)))*(180.0/3.14);
-}
+
+/*CODIGO PARA USAR EN MODO FILTRO*/
+
+#ifdef MODO_FILTRO_COMPLEMENTO
+  void updateGiro()
+  {
+     dt = millis() - tiempo_prev;
+     tiempo_prev = millis();
+  
+     incremento_giroscopio_z = (gz / 131)*dt / 1000.0;
+     incremento_giroscopio_y = (gy / 131)*dt / 1000.0;
+  }
+  
+  /*Esta funcion mplea un filtro de complemento para obtener unos valores mas exactos en cuanto a la orientacion del dispositivo*/
+  void filtroComplemento()
+  {
+    /*angulo = 0.98(anguloPrevioGiroscopio + incrementoGiroscopio) + 0.02 (anguloAcelerometro)
+     * los valores 0.98 y 0.2 pueden cambiarse, pero deben sumas siempre 1.0
+     */
+    angulo_z_filtro_comp = 0.98*(incremento_giroscopio_z + ang_z_prev) + 0.02 * accel_ang_z;
+    angulo_y_filtro_comp = 0.98*(incremento_giroscopio_y + ang_y_prev) + 0.02 * accel_ang_y;
+
+    ang_z_prev = angulo_z_filtro_comp;
+    ang_y_prev = angulo_y_filtro_comp;
+  }
+/*FIN DEL CODIGO EN MODO FILTRO*/
+
+
+#else
+/*CODIGO EN MODO NO FILTRO*/
+ void updateGiro()
+  {
+     dt = millis() - tiempo_prev;
+     tiempo_prev = millis();
+  
+     girosc_ang_z = (gz / 131)*dt / 1000.0 + ang_z_prev;
+     girosc_ang_y = (gy / 131)*dt / 1000.0 + ang_y_prev;
+   
+     ang_z_prev = girosc_ang_z;
+     ang_y_prev = girosc_ang_y;
+  }
+  
+
+#endif
 
 
