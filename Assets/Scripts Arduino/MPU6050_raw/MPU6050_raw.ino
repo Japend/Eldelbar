@@ -39,6 +39,8 @@ THE SOFTWARE.
 #include <SoftwareSerial.h>
 
 
+const int16_t OFFSET_GRAVEDAD = 3750;
+const float FACTOR_NORMALIZ = 8191;
 
 // Arduino Wire library is required if I2Cdev I2CDEV_ARDUINO_WIRE implementation
 // is used in I2Cdev.h
@@ -71,6 +73,7 @@ bool blinkState = false;
 long tiempo_prev, dt;
 float girosc_ang_z, girosc_ang_y;
 float ang_z_prev, ang_y_prev;
+float accelX, accelY, accelZ; //guardan la aceleracion procesada en rango 2, -2
 
 #ifdef MODO_FILTRO_COMPLEMENTO
   float angulo_z_filtro_comp, angulo_y_filtro_comp;
@@ -122,14 +125,17 @@ void loop() {
 
     updateGiro();
     rotacionAcelerometro();
+    procesarDatosAcelerometro();
     
         // display tab-separated accel/gyro x/y/z values
 
         #ifdef MODO_FILTRO_COMPLEMENTO
         filtroComplemento();
-        Serial.print("ANGULOS CON FILTRO COMPEMENTO: \t");
         Serial.print(angulo_y_filtro_comp); Serial.print(",");
-        Serial.println(angulo_z_filtro_comp); 
+        Serial.print(angulo_z_filtro_comp); Serial.print("|");
+        Serial.print(accelX); Serial.print(",");
+        Serial.print(accelY); Serial.print(",");
+        Serial.println(accelZ);
 
         #else
           Serial.print("ANGULOS SIN FILTRO COMPEMENTO: \t")
@@ -155,8 +161,15 @@ void loop() {
    */
   void rotacionAcelerometro()
   {
-    accel_ang_y=atan((az - 3700)/sqrt(pow(ay,2) + pow(ax,2)))*(180.0/3.14);
+    accel_ang_y=atan((az)/sqrt(pow(ay - OFFSET_GRAVEDAD,2) + pow(ax,2)))*(180.0/3.14);
     accel_ang_z=atan(ay/sqrt(pow(az,2) + pow(ax,2)))*(180.0/3.14);
+  }
+
+  void procesarDatosAcelerometro()
+  {
+    accelX = (ax / FACTOR_NORMALIZ) - 1; //evitar aceleracion de gravedad
+    accelY = ay / FACTOR_NORMALIZ;
+    accelZ = az / FACTOR_NORMALIZ;
   }
 
 

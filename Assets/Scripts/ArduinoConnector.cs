@@ -9,16 +9,20 @@ using System.IO.Ports;
 public class ArduinoConnector : MonoBehaviour {
     
     private SerialPort stream;
+    public String datos;
 
     public void Start () {
         // Opens the serial port
+        datos = "";
         stream = new SerialPort("COM4", 38400);
         stream.Open();
     }
     
     public void Update()
     {
-        Debug.Log(stream.ReadLine());
+
+        //Debug.Log(stream.ReadLine());
+        datos = stream.ReadLine();
         stream.BaseStream.Flush();
     }
    
