@@ -7,12 +7,14 @@ using System.Collections;
 using System.IO.Ports;
 
 public class ArduinoConnector : MonoBehaviour {
-    
+
+    public String port;
+    public int frequency;
     private SerialPort stream;
 
     public void Start () {
         // Opens the serial port
-        stream = new SerialPort("COM4", 38400);
+        stream = new SerialPort(port, frequency);
         stream.Open();
     }
     
