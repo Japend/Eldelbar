@@ -6,24 +6,28 @@ using System;
 using System.Collections;
 using System.IO.Ports;
 
-public class ArduinoConnector : MonoBehaviour {
+public class ArduinoConnector : MonoBehaviour
+{
 
-    public String port;
-    public int frequency;
     private SerialPort stream;
+    public String datos;
 
-    public void Start () {
+    public void Start()
+    {
         // Opens the serial port
-        stream = new SerialPort(port, frequency);
+        datos = "";
+        stream = new SerialPort("COM4", 38400);
         stream.Open();
     }
-    
+
     public void Update()
     {
-        Debug.Log(stream.ReadLine());
+
+        //Debug.Log(stream.ReadLine());
+        datos = stream.ReadLine();
         stream.BaseStream.Flush();
     }
-   
+
 
     public void Close()
     {
