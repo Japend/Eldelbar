@@ -6,18 +6,20 @@ using System;
 using System.Collections;
 using System.IO.Ports;
 
-public class ArduinoConnector : MonoBehaviour {
-    
+public class ArduinoConnector : MonoBehaviour
+{
+
     private SerialPort stream;
     public String datos;
 
-    public void Start () {
+    public void Start()
+    {
         // Opens the serial port
         datos = "";
         stream = new SerialPort("COM4", 38400);
         stream.Open();
     }
-    
+
     public void Update()
     {
 
@@ -25,7 +27,7 @@ public class ArduinoConnector : MonoBehaviour {
         datos = stream.ReadLine();
         stream.BaseStream.Flush();
     }
-   
+
 
     public void Close()
     {
