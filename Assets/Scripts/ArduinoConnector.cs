@@ -11,12 +11,14 @@ public class ArduinoConnector : MonoBehaviour
 
     private SerialPort stream;
     public String datos;
+    public String port;
+    public int frequency;
 
     public void Start()
     {
         // Opens the serial port
         datos = "";
-        stream = new SerialPort("COM4", 38400);
+        stream = new SerialPort(port, frequency);
         stream.Open();
     }
 
