@@ -39,7 +39,7 @@ THE SOFTWARE.
 #include <SoftwareSerial.h>
 
 
-const int16_t OFFSET_GRAVEDAD = 3750;
+const int16_t OFFSET_GRAVEDAD = 8291;
 const float FACTOR_NORMALIZ = 8191;
 
 // Arduino Wire library is required if I2Cdev I2CDEV_ARDUINO_WIRE implementation
@@ -74,6 +74,7 @@ long tiempo_prev, dt;
 float girosc_ang_z, girosc_ang_y;
 float ang_z_prev, ang_y_prev;
 float accelX, accelY, accelZ; //guardan la aceleracion procesada en rango 2, -2
+float factor_gravedad_x, factor_gravedad_y, factor_gravedad_z; 
 
 #ifdef MODO_FILTRO_COMPLEMENTO
   float angulo_z_filtro_comp, angulo_y_filtro_comp;
@@ -122,10 +123,11 @@ void loop() {
     Serial.flush();
     // read raw accel/gyro measurements from device
     accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
-
+    
     updateGiro();
     rotacionAcelerometro();
     procesarDatosAcelerometro();
+    calcularFactoresGravedad();
     
         // display tab-separated accel/gyro x/y/z values
 
@@ -161,18 +163,41 @@ void loop() {
    */
   void rotacionAcelerometro()
   {
-    accel_ang_y=atan((az)/sqrt(pow(ay - OFFSET_GRAVEDAD,2) + pow(ax,2)))*(180.0/3.14);
+    accel_ang_y=atan((az)/sqrt(pow(ay/* - OFFSET_GRAVEDAD*/,2) + pow(ax,2)))*(180.0/3.14);
     accel_ang_z=atan(ay/sqrt(pow(az,2) + pow(ax,2)))*(180.0/3.14);
   }
 
   void procesarDatosAcelerometro()
   {
-    accelX = (ax / FACTOR_NORMALIZ) - 1; //evitar aceleracion de gravedad
-    accelY = ay / FACTOR_NORMALIZ;
-    accelZ = az / FACTOR_NORMALIZ;
+    accelX = (ax  - (OFFSET_GRAVEDAD * factor_gravedad_x)) / FACTOR_NORMALIZ; //evitar aceleracion de gravedad
+    accelY = (ay  /*- (OFFSET_GRAVEDAD * factor_gravedad_y)*/) / FACTOR_NORMALIZ;
+    accelZ = (az  + (OFFSET_GRAVEDAD * factor_gravedad_z)) / FACTOR_NORMALIZ;
   }
 
+  //esta funcion calcula el porcentaje del offset gravedad que debe ser aplicado en cada eje
+  void calcularFactoresGravedad()
+  {
+    //factor de gravedad en eje x (a 1 cuando y 180 y 0)
+    if(abs(angulo_y_filtro_comp) < 90)
+    {
+      factor_gravedad_x = ((90.0 - abs(angulo_y_filtro_comp)) / 80.0); //la division del final es para el signo
+    }
+   /* if(angulo_y_filtro_comp > 0)
+      factor_gravedad_x = -factor_gravedad_x;*/
+    else if(abs(angulo_y_filtro_comp) < 180)
+    {
+      factor_gravedad_x = (abs(angulo_y_filtro_comp) - 90) / 80 * angulo_y_filtro_comp/abs(angulo_y_filtro_comp);
+    }
 
+    if(abs(angulo_y_filtro_comp) > 5 && abs(angulo_y_filtro_comp) < 85)
+      factor_gravedad_z = 1.4 - factor_gravedad_x;
+    else
+      factor_gravedad_z = 1.0 - factor_gravedad_x;
+
+    if(angulo_y_filtro_comp > 0)
+      factor_gravedad_z *= -0.8;
+    
+  }
 /*CODIGO PARA USAR EN MODO FILTRO*/
 
 #ifdef MODO_FILTRO_COMPLEMENTO
