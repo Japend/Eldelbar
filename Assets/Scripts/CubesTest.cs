@@ -9,7 +9,7 @@ public class CubesTest : MonoBehaviour {
     Renderer myRenderer;
 
     public ArduinoConnector info;
-    private static bool[] pinesActivos;
+    public /*private static*/ bool[] pinesActivos;
 
     // Use this for initialization
     void Start () {
@@ -29,29 +29,15 @@ public class CubesTest : MonoBehaviour {
             else pines[barras] += dato;
         }
 
-        LightCube();
-        //MoveCube();
+        for(int i=0; i<pines.Length; i++)
+        {
+            String valor = pines[i];
+            pinesActivos[i] = (valor != null && System.Convert.ToInt32(valor) < 10) ? true : false;
+        }
+               
 	}
 
-    void MoveCube()
-    {
-        if (pines[pinUsed - 1] != null)
-        {
-            Vector3 newPosition = new Vector3(transform.position.x,(45 - int.Parse(pines[pinUsed - 1])), transform.position.z);
-            transform.position = newPosition;
-        }
-    }
-
-    void LightCube()
-    {
-        bool condicion = System.Convert.ToInt32(pines[pinUsed - 1]) < 10;
-        if (pines[pinUsed - 1] != null)
-        {
-            pinesActivos[pinUsed - 1] = condicion;
-        }
-    }
-
-    public static bool[] getUltrasoundsArray()
+    public /*static*/ bool[] getUltrasoundsArray()
     {
         //Debug.Log(pinesActivos.ToString());
         return pinesActivos;
