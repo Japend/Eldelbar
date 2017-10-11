@@ -169,9 +169,9 @@ void loop() {
 
   void procesarDatosAcelerometro()
   {
-    accelX = (ax  - (OFFSET_GRAVEDAD * factor_gravedad_x)) / FACTOR_NORMALIZ; //evitar aceleracion de gravedad
+    accelX = ax/ FACTOR_NORMALIZ; //evitar aceleracion de gravedad
     accelY = (ay  /*- (OFFSET_GRAVEDAD * factor_gravedad_y)*/) / FACTOR_NORMALIZ;
-    accelZ = (az  + (OFFSET_GRAVEDAD * factor_gravedad_z)) / FACTOR_NORMALIZ;
+    accelZ = az/ FACTOR_NORMALIZ;
   }
 
   //esta funcion calcula el porcentaje del offset gravedad que debe ser aplicado en cada eje

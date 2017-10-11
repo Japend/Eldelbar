@@ -20,6 +20,9 @@ public class CubeMovement : MonoBehaviour {
     //private float[] accYDatos = new float[5] { 0, 0, 0, 0, 0 };
     private float[] accZDatos = new float[5] { 0, 0, 0, 0, 0 };
     int ciclo = 0;
+    float rotXant = 0f;
+    float rotYant = 0f;
+    float limitX = 0f;
 
 
 
@@ -119,113 +122,60 @@ public class CubeMovement : MonoBehaviour {
 
         rotationX = float.Parse(rotX);
         rotationY = float.Parse(rotY);
-        accelX = float.Parse(accX);
-        //accelY = float.Parse(accY);
-        accelZ = float.Parse(accZ);
-        Debug.Log(accelZ);
-        DeleteRuido();
-        Ajuste(rotationX,rotationY,accelX,  0,accelZ); 
-        //accel = new Vector3(accelX, 0, 0);
+        Ajuste();
         player.transform.localEulerAngles = new Vector3(rotationX, 0,rotationY);
-        //player.transform.Translate(accel);
+        Mover();
 
 
 
     }
 
 
-    private void Ajuste(float rotationX, float rotationY, float accelX, float accelY, float accelZ) {
+    private void Ajuste()
+    {
+        ciclo++;
 
+        if (rotationX < -15f && rotationX > 15f) { rotationX = 0f; }
+        if (rotationY < -15f && rotationY > 15f) { rotationY = 0f; }
         rotXDatos[ciclo] = rotationX;
         rotYDatos[ciclo] = rotationY;
-        accXDatos[ciclo] = accelX;
-        accZDatos[ciclo] = accelZ;
+        float datosXcount = 0;
+        float datosYcount = 0;
 
-        ciclo++;
-        if (ciclo > 4) {
+        for (int i = 0; i <= 4; i++) {
+
+            datosXcount = datosXcount + rotXDatos[i];
+            datosYcount = datosYcount + rotYDatos[i];
+
+
+        }
+
+        rotationX = datosXcount / 5f;
+        rotationY = datosYcount / 5f;
+
+
+        if (ciclo== 4) {
+
             ciclo = 0;
         }
-        Mezclar();
     }
 
-    private void Mezclar() {
+    private void Mover() {
 
-        /*float counterRotX = 0f;
-        float counterRotY = 0f;
-        float counterAccelX = 0f;
-        float counterAccelZ = 0f;
+        if (rotXant > player.transform.localEulerAngles.x) {
 
-
-
-        for (int i = 0; i < 5; i++) {
-
-            counterRotX = counterRotX + rotXDatos[i];
-            counterRotY = counterRotY + rotYDatos[i];
-            counterAccelX = counterAccelX + accXDatos[i];
-            counterAccelZ = counterAccelZ + accZDatos[i];
-
-        }
-
-        rotationX = counterRotX / 5f;
-        rotationY = counterRotY / 5f;
-        accelX = accelX / 5f;
-        accelZ = accelZ / 5f;*/
-        //Ajuste
-        int ant;
-        if (ciclo == 0)
-        {
-            ant = 4;
-        }
-        else {
-
-            ant = ciclo - 1;
-        }
-        //Aplicar Velocidad segun la dirección
-        if (accXDatos[ciclo] > accXDatos[ant] + 0.6f)
-        {
-
-            player.transform.Translate(2,0,0);
+            player.transform.position += Vector3.left + new Vector3(Mathf.Sin(player.transform.localEulerAngles.x)/10,0,0);
             
 
         }
-        else if (accXDatos[ciclo] < accXDatos[ant]-0.6f)
-        {
-
-            player.transform.Translate(-2, 0, 0);
-
-
-        }
-
-        if (accZDatos[ciclo] > accZDatos[ant] + 0.6f)
-        {
-
-            player.transform.Translate(0, -2, 0);
-
-        }
-        else if (accZDatos[ciclo] < accZDatos[ant] - 0.6f)
-        {
-
-            player.transform.Translate(0, 2, 0);
-
-
+        else if (rotXant < player.transform.localEulerAngles.x) {
+            player.transform.position += Vector3.right + new Vector3(Mathf.Sin(player.transform.localEulerAngles.x)/10, 0, 0);
+            
         }
 
 
+        rotXant = player.transform.localEulerAngles.x;
     }
 
-    private void DeleteRuido() {
 
-        if (accelX > -0.15f && accelX < 0.15f) {
-
-            accelX = 0f;
-        }
-
-
-        if (accelZ > -0.15f && accelZ < 0.15f)
-        {
-
-            accelZ = 0f;
-        }
-
-    }
 }

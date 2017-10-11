@@ -24,17 +24,45 @@ public class ControlMenuPrincipal : MonoBehaviour {
 
 	void Update () {
 
-		if (estadoAnterior != GlobalData.EstadoJuego) {
-			estadoAnterior = GlobalData.EstadoJuego;
+		if (estadoAnterior != DatosGlobales.EstadoJuego) {
+			estadoAnterior = DatosGlobales.EstadoJuego;
 
-			switch (GlobalData.EstadoJuego) {
+			switch (DatosGlobales.EstadoJuego) {
 
-			case GlobalData.MENU_PRINCIPAL:
+			case DatosGlobales.MENU_PRINCIPAL:
 				empezar.SetActive (true);
 				salir.SetActive (true);
+				calibrar.SetActive (true);
+				calibrando.SetActive (false);
+				continuar.SetActive (false);
+				Time.timeScale = 0;
 				break;
 
+			case DatosGlobales.JUGANDO:
+				this.gameObject.GetComponent<Canvas> ().enabled = false;
+				Time.timeScale = 0;
+				break;
+
+			case DatosGlobales.PAUSA:
+				this.gameObject.GetComponent<Canvas> ().enabled = true;
+				empezar.SetActive (false);
+				salir.SetActive (true);
+				calibrar.SetActive (true);
+				calibrando.SetActive (false);
+				continuar.SetActive (true);
+				Time.timeScale = 0;
+				break;
+
+			case DatosGlobales.CALIBRANDO:
+				empezar.SetActive (false);
+				salir.SetActive (false);
+				calibrar.SetActive (false);
+				calibrando.SetActive (true);
+				continuar.SetActive (false);
+				break;
 			}
 		}
+
+		//codigo para leer ultrasonidos y modificar stado del juego
 	}
 }
