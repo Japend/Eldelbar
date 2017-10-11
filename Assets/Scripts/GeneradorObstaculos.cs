@@ -1,9 +1,10 @@
-﻿using System.Collections;
+﻿#define DEBUG
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class GeneradorObstaculos : MonoBehaviour {
-
 
 	private class Obstaculo
 	{
@@ -49,9 +50,10 @@ public class GeneradorObstaculos : MonoBehaviour {
 	private const int ESPECIALES = 3;
 
 	private const float TIEMPO_MINIMO_ENTRE_OBSTACULOS = 2.0F;
-	private const float TIEMPO_MAXIMO_ENTRE_OBSTACULOS = 5.0F;
-	private const float Z_INICIAL = 7;
+	private const float TIEMPO_MAXIMO_ENTRE_OBSTACULOS = 3.0F;
+	private const float Z_INICIAL = 14;
     private const float Z_FINAL = -10;
+
 
 	public GameObject[][] obstaculosBase;
     public Vector3 velocidadBase; //velocidad que usaran los obstaculos normales *1, los rapidos *2 y los grnades *0.5
@@ -61,15 +63,17 @@ public class GeneradorObstaculos : MonoBehaviour {
 	float[] valoresFrontera;
 	float tiempoRestanteAparicionNormal, tiempoRestanteAparicionTipos23;
 
+
 	void Awake () {
 
         /*se obtiene las coordenadas de las esquinas para definir el espacio en el que pueden aparecer los obstaculos*/
 		Vector3 aux;
-		aux = GameObject.Find ("NE").GetComponent<Transform> ().position;
+        valoresFrontera = new float[4];
+		aux = GameObject.Find ("NE").transform.position;
 		valoresFrontera [X_MAX] = aux.x;
 		valoresFrontera [Y_MAX] = aux.y;
 
-		aux = GameObject.Find ("SW").GetComponent<Transform> ().position;
+        aux = GameObject.Find("SW").transform.position;
 		valoresFrontera [X_MIN] = aux.x;
 		valoresFrontera [Y_MAX] = aux.y;
 
@@ -80,15 +84,19 @@ public class GeneradorObstaculos : MonoBehaviour {
 		generaPiscinaObstaculos();
 		tiempoRestanteAparicionNormal = TIEMPO_MAXIMO_ENTRE_OBSTACULOS;
 		tiempoRestanteAparicionTipos23 = TIEMPO_MAXIMO_ENTRE_OBSTACULOS * 2;
+
+        //inicilizando variables
+        obstaculosActivos = new List<Obstaculo>();
+        obstaculosParaBorrar = new List<Obstaculo>();
 	}
 	
 
     //control de temporizadores para aparicion de obstaculos
 	void Update () {
 		tiempoRestanteAparicionNormal -= Time.deltaTime;
-
 		if (tiempoRestanteAparicionNormal <= 0) {
 			generarObstaculo (NORMALES);
+            tiempoRestanteAparicionNormal = Random.Range(TIEMPO_MAXIMO_ENTRE_OBSTACULOS, TIEMPO_MINIMO_ENTRE_OBSTACULOS);
 		}
 	}
 
@@ -100,7 +108,7 @@ public class GeneradorObstaculos : MonoBehaviour {
         foreach (Obstaculo obs in obstaculosActivos)
         {
             obs.GetObject().transform.position += obs.velocidad * Time.fixedDeltaTime;
-            if (obs.GetObject().transform.position.z > Z_FINAL)
+            if (obs.GetObject().transform.position.z < Z_FINAL)
                 obstaculosParaBorrar.Add(obs);
         }
 
@@ -117,18 +125,17 @@ public class GeneradorObstaculos : MonoBehaviour {
 	private void cargaObstaculos()
 	{
         /*lee los obstaculos en la escenar*/
-		GameObject[] obstaculosAux;
-
+		GameObject obstaculoAux;
 		obstaculosBase = new GameObject[4][];
 		piscinaObstaculos = new Obstaculo[4][][];
 
         //los obstaculos se encuetran en gameobjects llamados "ObstaculosTipox" donde x es el tipo
 		for (int i = 0; i < 4; i++) {
-			obstaculosAux = GameObject.Find("ObstaculosTipo" + i).GetComponentsInChildren<GameObject>();
-			obstaculosBase [i] = new GameObject[obstaculosAux.Length];
+			obstaculoAux = GameObject.Find("ObstaculosTipo" + i);
+			obstaculosBase [i] = new GameObject[obstaculoAux.transform.childCount];
 
-			for(int j = 0; j < obstaculosAux.Length; j++)
-				obstaculosBase[i][j] = obstaculosAux[j];
+            for (int j = 0; j < obstaculoAux.transform.childCount; j++)
+                obstaculosBase[i][j] = obstaculoAux.transform.GetChild(j).gameObject;
 		}
 	}
 
@@ -146,9 +153,22 @@ public class GeneradorObstaculos : MonoBehaviour {
 				}
 			}
 		}
+
+        #if DEBUG
+        for (int i = 0; i < piscinaObstaculos.Length; i++)
+        {
+            for (int j = 0; j < piscinaObstaculos[i].Length; j++)
+            {
+                for (int k = 0; k < piscinaObstaculos[i][j].Length; k++)
+                {
+                    Debug.Log(System.Convert.ToInt32(i) + "/" + System.Convert.ToInt32(j) + "/" + System.Convert.ToInt32(k) + "/" + piscinaObstaculos[i][j][k].GetObject().name);
+                }
+            }
+        }
+#endif
 	}
-		
-	private void generarObstaculo(int i)
+
+    private void generarObstaculo(int i)
 	{
 		//recorre la piscina correspondiente al obstaculo
 		bool ok = false;
@@ -157,8 +177,13 @@ public class GeneradorObstaculos : MonoBehaviour {
 
 		while (!ok) {
 			aux = Random.Range(0, piscinaObstaculos[i].Length);
-			for (int j = 0; i < 5; i++) {
+			for (int j = 0; j < 5; j++) {
 				//si hay alguno sin usar, lo elige
+
+#if DEBUG
+                Debug.Log(System.Convert.ToInt32(i) + "/" + System.Convert.ToInt32(aux));
+#endif
+
 				if (!piscinaObstaculos [i] [aux] [j].usandose) {
                     
                     prepararObstaculo(piscinaObstaculos[i][aux][j], aux);
@@ -170,9 +195,9 @@ public class GeneradorObstaculos : MonoBehaviour {
 				}
 			}
 				//si no, prueba con otro obstaculo, si no quedan no se instancia ninguno
-			if ( !ok && aux < piscinaObstaculos [i].Length )
+			if (aux < piscinaObstaculos [i].Length - 1 )
 					aux++;
-			else if (!ok)
+			else
 					return;
 		}
 
@@ -182,9 +207,13 @@ public class GeneradorObstaculos : MonoBehaviour {
     private void prepararObstaculo(Obstaculo obs, int tipo)
     {
         obs.GetObject().SetActive(true);
-        obs.GetObject().transform.position = new Vector3(Random.Range(X_MIN, X_MAX),
-            Random.Range(Y_MIN, Y_MAX), Z_INICIAL);
+        obs.GetObject().transform.position = new Vector3(Random.Range(valoresFrontera[X_MIN], valoresFrontera[X_MAX]),
+            Random.Range(valoresFrontera[Y_MIN], valoresFrontera[Y_MAX]), Z_INICIAL);
+        obs.usandose = true;
 
+#if DEBUG
+        Debug.Log(obs.GetObject().transform.position);
+#endif
         switch (tipo)
         {
             case NORMALES:
