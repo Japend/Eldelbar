@@ -6,10 +6,10 @@ using System;
 public class CubesTest : MonoBehaviour {
 
     public String[] pines;
-    public int pinUsed;
     Renderer myRenderer;
 
     public ArduinoConnector info;
+    private static bool[] pinesActivos;
 
     // Use this for initialization
     void Start () {
@@ -44,12 +44,17 @@ public class CubesTest : MonoBehaviour {
 
     void LightCube()
     {
-        if (pines[pinUsed - 1] != null && pines[pinUsed - 1] != "45")
+        bool condicion = System.Convert.ToInt32(pines[pinUsed - 1]) < 10;
+        if (pines[pinUsed - 1] != null)
         {
-            myRenderer.material = myRenderer.materials[1];
-            //Debug.Log("Iluminado");
+            pinesActivos[pinUsed - 1] = condicion;
         }
-        else 
-            myRenderer.material = myRenderer.materials[0];
     }
+
+    public static bool[] getUltrasoundsArray()
+    {
+        //Debug.Log(pinesActivos.ToString());
+        return pinesActivos;
+    }
+
 }
