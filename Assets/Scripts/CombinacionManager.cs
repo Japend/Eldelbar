@@ -27,19 +27,19 @@ public class CombinacionManager : MonoBehaviour {
     private SerialPort stream;
     public String[] pines;
     Renderer myRenderer;
-    public /*static*/ bool[] pinesActivos;
+    public static bool[] pinesActivos;
 
     /*************************/
-
-    public int[] combinacion;
-    int nivelInicial = 1; //Indica los elementos a pulsar seguidos (habrá que hacer el temporizador en función a esto también)
-    int indiceActual = 0; // Índice en el que está comprobando si se ha pulsado (En array "combinación")
+    public int nivelInicial = 1; //Indica los elementos a pulsar seguidos (habrá que hacer el temporizador en función a esto también)
+    public int indiceActual = 0; // Índice en el que está comprobando si se ha pulsado (En array "combinación")
     int nivelActual;
 
+    public int[] combinacion;
+    public bool[] acertados;
 
 	// Use this for initialization
 	void Awake () {
-        combinacion = new int[nivelInicial];
+        nivelActual = nivelInicial;        
         NuevaCombinacion();
 
         datos = "";
@@ -48,9 +48,11 @@ public class CombinacionManager : MonoBehaviour {
 
         pines = new String[numFuentes];
         pinesActivos = new bool[numFuentes];
+        acertados = new bool[nivelInicial]; //Tendrá que crearse un nuevo array a cada nivel
+
         for (int i = 0; i < pinesActivos.Length; i++) pinesActivos[i] = false;
         myRenderer = this.GetComponent<Renderer>();
-        nivelActual = nivelInicial;
+        
     }
 
 
@@ -60,7 +62,7 @@ public class CombinacionManager : MonoBehaviour {
         stream.BaseStream.Flush(); //Vacía el buffer
         pines = ArduinoSplit(datos, separador); //Guarda en cada posición del array la distancia de cada ultrasonido           
 
-        //ComprobarCombinacion();
+        ComprobarCombinacion();
             
     }
 
@@ -86,31 +88,35 @@ public class CombinacionManager : MonoBehaviour {
         return _pines;
     }
 
-    public /*static*/ bool[] GetPinesActivos()
-    {
-        return pinesActivos;
-    }
-
+    
 
     void ComprobarCombinacion()
     {
         //Si se mira ese pin y está descativado, paso
-        if (pinesActivos[combinacion[indiceActual]] == false) return;
+        //if (pinesActivos[combinacion[indiceActual]] == false) return;
 
         for (int i=0; i<pinesActivos.Length; i++)
         {
             //Si está activado, compruebo que sea el único (Si hay alguno activado salgo directamente, ya no me vale
             if (i != combinacion[indiceActual] && pinesActivos[i] == true)
             {
-                indiceActual = 0;
+                indiceActual = 0; //En el momento en que fallas, se reinicia
+                for (int a = 0; a < acertados.Length; a++) acertados[a] = false;
                 return;
             }
         }
 
+        //Si llega hasta aquí, es que solo está a true el pin que queremos en ese momento, entonces...
+        acertados[indiceActual] = true;
+        indiceActual++; //Se pasa de índice
 
         if(indiceActual == nivelActual - 1) //Ha llegado hasta el final del array --> Ha acertado todos en el orden correcto
         {
-            //Debug.Log("CORRECTO!");
+            Debug.Log("CORRECTO!");
+            /*
+            nivelActual++;
+            NuevaCombinacion();
+            */            
         }
 
 
@@ -118,27 +124,19 @@ public class CombinacionManager : MonoBehaviour {
 
     void NuevaCombinacion()
     {
-        for(int i = 0; i<combinacion.Length; i++)
+        combinacion = new int[nivelActual]; //Tendrá que crearse un nuevo array a cada nivel
+        for (int i = 0; i<combinacion.Length; i++)
         {
             combinacion[i] = UnityEngine.Random.Range(0, 3); //Número random entre 0 y 3 (indica los pines que se deben pulsar)
         }
     }
+
+
+
+    public static bool[] GetPinesActivos()
+    {
+        return pinesActivos;
+    }
+
+
 }
-
-/*     
-            
-            
-            
-            //Si se está mirando otro pin y está a true...
-            if (i != combinacion[indiceActual] && pinesActivos[i])
-            {
-                indiceActual = 0;
-                return; //Sale de la función y vuelta a empezar
-            }
-
-            //Se está mirando el pin que debe estar activo y en efecto, está activo...
-            if (i == combinacion[indiceActual] && pinesActivos[i])
-            {
-                indiceActual++; //Se pasa al siguiente a comprobar
-            }
-*/

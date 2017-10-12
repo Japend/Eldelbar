@@ -15,6 +15,6 @@ public class Combinacion : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        //text.color = (CombinacionManager.GetPinesActivos()[pin]) ? Color.red : Color.black;
+        text.color = (CombinacionManager.GetPinesActivos()[pin]) ? Color.red : Color.black;
 	}
 }
