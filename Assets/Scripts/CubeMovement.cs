@@ -127,14 +127,7 @@ public class CubeMovement : MonoBehaviour {
 
         player.transform.localEulerAngles = new Vector3(rotationX, 0, rotationY);
         player.transform.Translate(-(rotationY/50), -(rotationX / 100), 0);
-        /*if (player.transform.position.x >= 10) {
-            if (player.transform.position.y >= 2) {
-
-                player.transform.Translate(10,2,0);
-
-            }
-            
-        }*/
+        
 
     }
 
