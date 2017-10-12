@@ -17,9 +17,9 @@ public class DatosUltrasonidos : MonoBehaviour {
     public String[] pines;
     Renderer myRenderer;    
 
-    public /*private static*/ bool[] pinesActivos;
+    private static bool[] pinesActivos;
 
-    void Start () {
+    void Awake () {
         datos = "";
         stream = new SerialPort(port, frequency);
         stream.Open();
@@ -57,7 +57,7 @@ public class DatosUltrasonidos : MonoBehaviour {
         return _pines;
     }
 
-    public /*static*/ bool[] GetUltrasoundsArray()
+    public static bool[] GetPinesActivos()
     {
         return pinesActivos;
     }
