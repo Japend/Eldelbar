@@ -30,9 +30,9 @@ public class CombinacionManager : MonoBehaviour {
     public static bool[] pinesActivos;
 
     /*************************/
-    public int nivelInicial = 1; //Indica los elementos a pulsar seguidos (habrá que hacer el temporizador en función a esto también)
+    public int nivelInicial = 2; //Indica los elementos a pulsar seguidos (habrá que hacer el temporizador en función a esto también)
     public int indiceActual = 0; // Índice en el que está comprobando si se ha pulsado (En array "combinación")
-    int nivelActual;
+    public int nivelActual;
 
     public int[] combinacion;
     public bool[] acertados;
@@ -93,7 +93,8 @@ public class CombinacionManager : MonoBehaviour {
     void ComprobarCombinacion()
     {
         //Si se mira ese pin y está descativado, paso
-        //if (pinesActivos[combinacion[indiceActual]] == false) return;
+        //if (pinesActivos[combinacion[indiceActual]] == false) return; 
+        //ESTO ESTÁ MAL, PORQUE EN EL MOMENTO EN QUE NO ESTÉ ACTIVO NO LO COMPRUEBA HASTA QUE ESTÉ ACTIVO. DE ESTA FORMA NUNCA SE REINICIA
 
         for (int i=0; i<pinesActivos.Length; i++)
         {
@@ -106,25 +107,29 @@ public class CombinacionManager : MonoBehaviour {
             }
         }
 
-        //Si llega hasta aquí, es que solo está a true el pin que queremos en ese momento, entonces...
-        acertados[indiceActual] = true;
-        indiceActual++; //Se pasa de índice
-
-        if(indiceActual == nivelActual - 1) //Ha llegado hasta el final del array --> Ha acertado todos en el orden correcto
+        if(pinesActivos[combinacion[indiceActual]] == true)
         {
-            Debug.Log("CORRECTO!");
-            /*
-            nivelActual++;
-            NuevaCombinacion();
-            */            
+            acertados[indiceActual] = true;
+            indiceActual++; //Se actualiza el índice
         }
+        
 
-
+        if(indiceActual == nivelActual) //Ha llegado hasta el final del array --> Ha acertado todos en el orden correcto
+        {
+            Debug.Log("CORRECTO!");            
+            nivelActual++;
+            NuevaCombinacion();                      
+        }
     }
 
     void NuevaCombinacion()
     {
+        //REINICIAMOS VARIABLES
         combinacion = new int[nivelActual]; //Tendrá que crearse un nuevo array a cada nivel
+        acertados = new bool[nivelActual];
+        indiceActual = 0; //Reinicia el índice
+        
+
         for (int i = 0; i<combinacion.Length; i++)
         {
             combinacion[i] = UnityEngine.Random.Range(0, 3); //Número random entre 0 y 3 (indica los pines que se deben pulsar)
