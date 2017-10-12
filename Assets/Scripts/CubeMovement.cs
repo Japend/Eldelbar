@@ -9,12 +9,12 @@ public class CubeMovement : MonoBehaviour {
     private float rotationX;
     private float rotationY;
     private float accelX;
-   //private float accelY;
+    //private float accelY;
     private float accelZ;
     public float speed = 1f;
     private float accelation = 0.5f;
     private Vector3 accel;
-    private float[] rotXDatos = new float[5] { 0,0,0,0,0};
+    private float[] rotXDatos = new float[5] { 0, 0, 0, 0, 0 };
     private float[] rotYDatos = new float[5] { 0, 0, 0, 0, 0 };
     private float[] accXDatos = new float[5] { 0, 0, 0, 0, 0 };
     //private float[] accYDatos = new float[5] { 0, 0, 0, 0, 0 };
@@ -23,21 +23,16 @@ public class CubeMovement : MonoBehaviour {
     float rotXant = 0f;
     float rotYant = 0f;
     float limitX = 0f;
-
-
-
-
-
-
+    float movimientoX = 0f;
 
 
     // Use this for initialization
-    void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
+    void Start() {
+
+    }
+
+    // Update is called once per frame
+    void Update() {
 
         int comas = 0;
         int separa = 0;
@@ -47,11 +42,11 @@ public class CubeMovement : MonoBehaviour {
         string accY = "";
         string accZ = "";
 
-        foreach ( char dato in info.datos) {
+        foreach (char dato in info.datos) {
             if (separa == 0) //Rotaciones
             {
                 if (comas == 0) //Rotacion en X
-                {   
+                {
                     if (dato.Equals(','))
                     {
                         comas++;
@@ -71,7 +66,7 @@ public class CubeMovement : MonoBehaviour {
 
                         comas = 0;
                         separa++;
-                        
+
                     }
                     else {
 
@@ -118,25 +113,37 @@ public class CubeMovement : MonoBehaviour {
             }
         }
 
-        
+
 
         rotationX = float.Parse(rotX);
         rotationY = float.Parse(rotY);
         Ajuste();
-        player.transform.localEulerAngles = new Vector3(rotationX, 0,rotationY);
         Mover();
 
 
+    }
+
+    private void Mover() {
+
+        player.transform.localEulerAngles = new Vector3(rotationX, 0, rotationY);
+        player.transform.Translate(-(rotationY/50), -(rotationX / 100), 0);
+        /*if (player.transform.position.x >= 10) {
+            if (player.transform.position.y >= 2) {
+
+                player.transform.Translate(10,2,0);
+
+            }
+            
+        }*/
 
     }
+
 
 
     private void Ajuste()
     {
         ciclo++;
-
-        if (rotationX < -15f && rotationX > 15f) { rotationX = 0f; }
-        if (rotationY < -15f && rotationY > 15f) { rotationY = 0f; }
+        if (rotationY < 10 && rotationY > -20) { rotationY = 0; }
         rotXDatos[ciclo] = rotationX;
         rotYDatos[ciclo] = rotationY;
         float datosXcount = 0;
@@ -158,23 +165,6 @@ public class CubeMovement : MonoBehaviour {
 
             ciclo = 0;
         }
-    }
-
-    private void Mover() {
-
-        if (rotXant > player.transform.localEulerAngles.x) {
-
-            player.transform.position += Vector3.left + new Vector3(Mathf.Sin(player.transform.localEulerAngles.x)/10,0,0);
-            
-
-        }
-        else if (rotXant < player.transform.localEulerAngles.x) {
-            player.transform.position += Vector3.right + new Vector3(Mathf.Sin(player.transform.localEulerAngles.x)/10, 0, 0);
-            
-        }
-
-
-        rotXant = player.transform.localEulerAngles.x;
     }
 
 
