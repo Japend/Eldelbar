@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.IO.Ports;
+using UnityEngine.UI;
 
 public class CombinacionManager : MonoBehaviour {
 
@@ -36,6 +37,8 @@ public class CombinacionManager : MonoBehaviour {
 
     public int[] combinacion;
     public bool[] acertados;
+
+    public Text textoCombinacion;
 
 	// Use this for initialization
 	void Awake () {
@@ -118,6 +121,7 @@ public class CombinacionManager : MonoBehaviour {
         {
             Debug.Log("CORRECTO!");            
             nivelActual++;
+            textoCombinacion.text = "";
             NuevaCombinacion();                      
         }
     }
@@ -132,8 +136,15 @@ public class CombinacionManager : MonoBehaviour {
 
         for (int i = 0; i<combinacion.Length; i++)
         {
-            combinacion[i] = UnityEngine.Random.Range(0, 3); //Número random entre 0 y 3 (indica los pines que se deben pulsar)
+            combinacion[i] = UnityEngine.Random.Range(0, 3); //Número random entre 0 y 3 (indica los pines que se deben pulsar)                        
         }
+
+        for (int k = 0; k < combinacion.Length; k++)
+        {
+            textoCombinacion.text += combinacion[k];
+                if (k != combinacion.Length - 1) textoCombinacion.text += " - ";
+        }
+
     }
 
 
