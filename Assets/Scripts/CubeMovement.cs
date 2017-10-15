@@ -25,14 +25,9 @@ public class CubeMovement : MonoBehaviour {
     float limitX = 0f;
     float movimientoX = 0f;
 
-
-    // Use this for initialization
-    void Start() {
-
-    }
-
     // Update is called once per frame
     void Update() {
+
 
         int comas = 0;
         int separa = 0;
@@ -114,11 +109,20 @@ public class CubeMovement : MonoBehaviour {
         }
 
 
-
         rotationX = float.Parse(rotX);
         rotationY = float.Parse(rotY);
-        Ajuste();
-        Mover();
+
+        if (DatosGlobales.EstadoJuego == DatosGlobales.CALIBRANDO)
+        {
+            if (Calibrador.Calibrar(rotationX, rotationY, accelX))
+                DatosGlobales.EstadoJuego = DatosGlobales.PAUSA;
+        }
+
+        else if(DatosGlobales.EstadoJuego == DatosGlobales.JUGANDO)
+        {
+            Ajuste();
+            Mover();
+        }
 
 
     }

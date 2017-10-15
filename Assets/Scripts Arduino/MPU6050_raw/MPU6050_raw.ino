@@ -99,12 +99,12 @@ void setup() {
     Serial.begin(38600);
 
     // initialize device
-    Serial.println("Initializing I2C devices...");
+   // Serial.println("Initializing I2C devices...");
     accelgyro.initialize();
 
     // verify connection
-    Serial.println("Testing device connections...");
-    Serial.println(accelgyro.testConnection() ? "MPU6050 connection successful" : "MPU6050 connection failed");
+    //Serial.println("Testing device connections...");
+   // Serial.println(accelgyro.testConnection() ? "MPU6050 connection successful" : "MPU6050 connection failed");
 
     // use the code below to change accel/gyro offset values
 
@@ -127,7 +127,7 @@ void loop() {
     updateGiro();
     rotacionAcelerometro();
     procesarDatosAcelerometro();
-    calcularFactoresGravedad();
+    //calcularFactoresGravedad();
     
         // display tab-separated accel/gyro x/y/z values
 
@@ -169,7 +169,7 @@ void loop() {
 
   void procesarDatosAcelerometro()
   {
-    accelX = ax/ FACTOR_NORMALIZ; //evitar aceleracion de gravedad
+    accelX = ax; //evitar aceleracion de gravedad
     accelY = (ay  /*- (OFFSET_GRAVEDAD * factor_gravedad_y)*/) / FACTOR_NORMALIZ;
     accelZ = az/ FACTOR_NORMALIZ;
   }
