@@ -1,6 +1,4 @@
-﻿#define DEBUG
-
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,12 +9,14 @@ public class GeneradorObstaculos : MonoBehaviour {
 		GameObject obstaculo;
 		public Vector3 velocidad;
 		public bool usandose;
+        private int tipo;
 
-		public Obstaculo(GameObject obs)
+		public Obstaculo(GameObject obs, int tipo)
 		{
 			obstaculo = obs;
 			velocidad = new Vector3();
 			usandose = false;
+            this.tipo = tipo;
 		}
 
 		public GameObject GetObject()
@@ -27,6 +27,11 @@ public class GeneradorObstaculos : MonoBehaviour {
         public void SetUsandose(bool value)
         {
             usandose = value;
+        }
+
+        public int GetTipo()
+        {
+            return tipo;
         }
 	}
 	/* ------------------------------------------------------
@@ -51,8 +56,9 @@ public class GeneradorObstaculos : MonoBehaviour {
 
 	private const float TIEMPO_MINIMO_ENTRE_OBSTACULOS = 2.0F;
 	private const float TIEMPO_MAXIMO_ENTRE_OBSTACULOS = 3.0F;
-	private const float Z_INICIAL = 14;
-    private const float Z_FINAL = -10;
+    private const float TIEMPO_ENTRE_PUERTAS = 5;
+	private const float Z_INICIAL = 223;
+    private const float Z_FINAL = -25;
 
 
 	public GameObject[][] obstaculosBase;
@@ -61,7 +67,9 @@ public class GeneradorObstaculos : MonoBehaviour {
 	List<Obstaculo> obstaculosActivos, obstaculosParaBorrar;
 	Obstaculo[][][] piscinaObstaculos;
 	float[] valoresFrontera;
-	float tiempoRestanteAparicionNormal, tiempoRestanteAparicionTipos23;
+    float tiempoRestanteAparicionNormal, tiempoRestanteAparicionTipos23, tiempoRestanteAparicionPuertas;
+    CombinacionManager cm;
+    float tiempoInicial;
 
 
 	void Awake () {
@@ -84,12 +92,19 @@ public class GeneradorObstaculos : MonoBehaviour {
 		generaPiscinaObstaculos();
 		tiempoRestanteAparicionNormal = TIEMPO_MAXIMO_ENTRE_OBSTACULOS;
 		tiempoRestanteAparicionTipos23 = TIEMPO_MAXIMO_ENTRE_OBSTACULOS * 2;
+        tiempoRestanteAparicionPuertas = TIEMPO_ENTRE_PUERTAS;
 
         //inicilizando variables
         obstaculosActivos = new List<Obstaculo>();
         obstaculosParaBorrar = new List<Obstaculo>();
+        cm = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<CombinacionManager>();
+        tiempoInicial = Time.time;
 	}
-	
+
+    void Start()
+    {
+        cm.enabled = false;
+    }
 
     //control de temporizadores para aparicion de obstaculos
 	void Update () {
@@ -98,6 +113,14 @@ public class GeneradorObstaculos : MonoBehaviour {
 			generarObstaculo (NORMALES);
             tiempoRestanteAparicionNormal = Random.Range(TIEMPO_MAXIMO_ENTRE_OBSTACULOS, TIEMPO_MINIMO_ENTRE_OBSTACULOS);
 		}
+
+        tiempoRestanteAparicionPuertas -= Time.deltaTime;
+        if (tiempoRestanteAparicionPuertas <= 0)
+        {
+            generarObstaculo(ESPECIALES);
+            cm.enabled = true;
+            tiempoRestanteAparicionPuertas = Random.Range(TIEMPO_ENTRE_PUERTAS * 0.8f, TIEMPO_ENTRE_PUERTAS * 1.2f);
+        }
 	}
 
 
@@ -143,18 +166,23 @@ public class GeneradorObstaculos : MonoBehaviour {
 	{
 		piscinaObstaculos = new Obstaculo[4][][];
 		//se genera una piscina de obstaculos para evitar instanciar o eliminar objetos
-		for (int i = 0; i < obstaculosBase.Length; i++) {
+		for (int i = 0; i < obstaculosBase.Length - 1; i++) {
 			piscinaObstaculos [i] = new Obstaculo[obstaculosBase [i].Length][];
 			for(int j = 0; j < obstaculosBase[i].Length; j++){
                 piscinaObstaculos[i][j] = new Obstaculo[5];
 				for (int k = 0; k < 5; k++) {
-					piscinaObstaculos [i] [j] [k] = new Obstaculo (GameObject.Instantiate (obstaculosBase [i] [j]));
+					piscinaObstaculos [i] [j] [k] = new Obstaculo (GameObject.Instantiate (obstaculosBase [i] [j]), i);
                     piscinaObstaculos[i][j][k].GetObject().SetActive(false);
 				}
 			}
 		}
 
-        #if DEBUG
+        piscinaObstaculos[ESPECIALES] = new Obstaculo[1][];
+        piscinaObstaculos[ESPECIALES][0] = new Obstaculo[1];
+        piscinaObstaculos[ESPECIALES][0][0] = new Obstaculo(GameObject.Instantiate(obstaculosBase[ESPECIALES][0]), ESPECIALES);
+        piscinaObstaculos[ESPECIALES][0][0].GetObject().SetActive(false);
+
+    /*    #if DEBUG
         for (int i = 0; i < piscinaObstaculos.Length; i++)
         {
             for (int j = 0; j < piscinaObstaculos[i].Length; j++)
@@ -165,7 +193,7 @@ public class GeneradorObstaculos : MonoBehaviour {
                 }
             }
         }
-#endif
+#endif*/
 	}
 
     private void generarObstaculo(int i)
@@ -180,19 +208,22 @@ public class GeneradorObstaculos : MonoBehaviour {
 			for (int j = 0; j < 5; j++) {
 				//si hay alguno sin usar, lo elige
 
-#if DEBUG
+/*#if DEBUG
                 Debug.Log(System.Convert.ToInt32(i) + "/" + System.Convert.ToInt32(aux));
-#endif
+#endif*/
 
-				if (!piscinaObstaculos [i] [aux] [j].usandose) {
-                    
+                if (!piscinaObstaculos[i][aux][j].usandose)
+                {
+
                     prepararObstaculo(piscinaObstaculos[i][aux][j], aux);
 
                     //se anade a la lista de obstaculos activos
                     obstaculosActivos.Add(piscinaObstaculos[i][aux][j]);
-					ok = true;
-					break;
-				}
+                    ok = true;
+                    break;
+                }
+                else if (piscinaObstaculos[i][aux][j].GetTipo() == ESPECIALES)
+                    return;
 			}
 				//si no, prueba con otro obstaculo, si no quedan no se instancia ninguno
 			if (aux < piscinaObstaculos [i].Length - 1 )
@@ -207,31 +238,38 @@ public class GeneradorObstaculos : MonoBehaviour {
     private void prepararObstaculo(Obstaculo obs, int tipo)
     {
         obs.GetObject().SetActive(true);
-        obs.GetObject().transform.position = new Vector3(Random.Range(valoresFrontera[X_MIN], valoresFrontera[X_MAX]),
-            Random.Range(valoresFrontera[Y_MIN], valoresFrontera[Y_MAX]), Z_INICIAL);
+
+        if(tipo != ESPECIALES)
+            obs.GetObject().transform.position = new Vector3(Random.Range(valoresFrontera[X_MIN], valoresFrontera[X_MAX]),
+                    Random.Range(valoresFrontera[Y_MIN], valoresFrontera[Y_MAX]), Z_INICIAL);
         obs.usandose = true;
 
-#if DEBUG
+/*#if DEBUG
         Debug.Log(obs.GetObject().transform.position);
-#endif
+#endif*/
         switch (tipo)
         {
             case NORMALES:
-                obs.velocidad.z = velocidadBase.z * Random.Range(0.8f, 1.1f);
+                obs.velocidad.z = velocidadBase.z * Random.Range(0.8f, 1.1f) + (Time.time - tiempoInicial) * 0.01f;
                 break;
 
             case RAPIDOS:
-                obs.velocidad.z = velocidadBase.z * Random.Range(1.8f, 2.2f);
+                obs.velocidad.z = velocidadBase.z * Random.Range(1.8f, 2.2f) + (Time.time - tiempoInicial) * 0.01f;
                 break;
 
             case GRANDES:
-                obs.velocidad.z = velocidadBase.z * Random.Range(0.3f, 0.6f);
+                obs.velocidad.z = velocidadBase.z * Random.Range(0.3f, 0.6f) + (Time.time - tiempoInicial) * 0.01f;
                 break;
 
             case ESPECIALES:
-                //pendiente de decision
+                obs.velocidad.z = velocidadBase.z + (Time.time - tiempoInicial) * 0.01f;
                 break;
         }
+    }
+
+    public void SetTiempoInicial(float time)
+    {
+        tiempoInicial = time;
     }
 
 }
