@@ -17,7 +17,8 @@ public class CombinacionManager : MonoBehaviour {
      *  SI ES INCORRECTO, INDICE A 0 Y TODOS SE APAGAN
      *  */
 
-
+    private float contadorSecs = 0;
+    public float maxContadorSecs = 0.5f;
 
     public String datos;
     public String port;
@@ -61,12 +62,16 @@ public class CombinacionManager : MonoBehaviour {
 
     void Update()
     {
-        datos = stream.ReadLine(); //Coge los datos del buffer
-        stream.BaseStream.Flush(); //Vacía el buffer
-        pines = ArduinoSplit(datos, separador); //Guarda en cada posición del array la distancia de cada ultrasonido           
+        if (contadorSecs <= 0)
+        {
+            datos = stream.ReadLine(); //Coge los datos del buffer
+            stream.BaseStream.Flush(); //Vacía el buffer
+            pines = ArduinoSplit(datos, separador); //Guarda en cada posición del array la distancia de cada ultrasonido           
 
-        ComprobarCombinacion();
-            
+            ComprobarCombinacion();
+            contadorSecs = maxContadorSecs;
+        }
+        contadorSecs -= Time.deltaTime;
     }
 
     private String[] ArduinoSplit(String cadenaDatos, char separador)
