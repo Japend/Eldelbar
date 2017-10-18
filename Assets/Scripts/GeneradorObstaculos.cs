@@ -60,6 +60,8 @@ public class GeneradorObstaculos : MonoBehaviour {
 	private const float Z_INICIAL = 223;
     private const float Z_FINAL = -25;
 
+    private const float Z_LIMITE_PUERTAS = 40; //Si se choca contra la puerta (o acaba el tiempo) se acaba el juego
+
 
 	public GameObject[][] obstaculosBase;
     public Vector3 velocidadBase; //velocidad que usaran los obstaculos normales *1, los rapidos *2 y los grnades *0.5
@@ -177,10 +179,12 @@ public class GeneradorObstaculos : MonoBehaviour {
 			}
 		}
 
+        //PUERTA:
         piscinaObstaculos[ESPECIALES] = new Obstaculo[1][];
         piscinaObstaculos[ESPECIALES][0] = new Obstaculo[1];
         piscinaObstaculos[ESPECIALES][0][0] = new Obstaculo(GameObject.Instantiate(obstaculosBase[ESPECIALES][0]), ESPECIALES);
         piscinaObstaculos[ESPECIALES][0][0].GetObject().SetActive(false);
+        CombinacionManager.target = piscinaObstaculos[ESPECIALES][0][0].GetObject().GetComponent<Transform>();
 
     /*    #if DEBUG
         for (int i = 0; i < piscinaObstaculos.Length; i++)
@@ -194,7 +198,7 @@ public class GeneradorObstaculos : MonoBehaviour {
             }
         }
 #endif*/
-	}
+    }
 
     private void generarObstaculo(int i)
 	{

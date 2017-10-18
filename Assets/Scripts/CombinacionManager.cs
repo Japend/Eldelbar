@@ -17,6 +17,11 @@ public class CombinacionManager : MonoBehaviour {
      *  SI ES INCORRECTO, INDICE A 0 Y TODOS SE APAGAN
      *  */
 
+    public Canvas canvas;
+    public static Transform target; //La pared de la puerta
+    private Camera camera;
+    public static bool probandoCombinacion;
+
     public String datos;
     public String port;
     public int frequency = 38400;
@@ -39,7 +44,9 @@ public class CombinacionManager : MonoBehaviour {
     public Text textoCombinacion;
 
 	// Use this for initialization
-	void Start () {
+	void Awake () {
+
+        camera = GetComponent<Camera>();
         nivelActual = nivelInicial;        
         NuevaCombinacion();
 
@@ -58,14 +65,34 @@ public class CombinacionManager : MonoBehaviour {
     }
 
 
+    void ComprobarParedVisible()
+    {
+        Vector3 screenPoint = camera.WorldToViewportPoint(target.transform.position);
+        bool onScreen = screenPoint.z > 0 && screenPoint.x > 0 && screenPoint.x < 1.1 && screenPoint.y > 0 && screenPoint.y < 1;
+
+        if (onScreen)
+        {
+            //target.GetComponent<Renderer>().material.color = Color.blue;
+            //Debug.Log("SE VE");
+            canvas.enabled = true;
+            probandoCombinacion = true;
+            Time.timeScale = 0.2f;        
+            //PARAR UN DETERMINADO TIEMPO HASTA QUE SE HAGA LA COMBINACIÓN
+        }
+        else canvas.enabled = false;
+
+    }
+
+
     void Update()
     {
-            datos = stream.ReadLine(); //Coge los datos del buffer
-            //stream.DiscardInBuffer();
-            stream.BaseStream.Flush();
-            pines = ArduinoSplit(datos, separador); //Guarda en cada posición del array la distancia de cada ultrasonido           
+        datos = stream.ReadLine(); //Coge los datos del buffer
+        //stream.DiscardInBuffer();
+        stream.BaseStream.Flush();
+        pines = ArduinoSplit(datos, separador); //Guarda en cada posición del array la distancia de cada ultrasonido           
 
-            ComprobarCombinacion();
+        ComprobarCombinacion();
+        ComprobarParedVisible();
     }
 
     private String[] ArduinoSplit(String cadenaDatos, char separador)
@@ -115,10 +142,16 @@ public class CombinacionManager : MonoBehaviour {
             indiceActual++; //Se actualiza el índice
         }
         
-
+        //ES CORRECTA **********************************
         if(indiceActual == nivelActual) //Ha llegado hasta el final del array --> Ha acertado todos en el orden correcto
         {
-            Debug.Log("CORRECTO!");            
+            //Debug.Log("CORRECTO!");
+
+            //target.GetComponent<Renderer>().material.color = Color.green;
+            target.transform.position = new Vector3(target.transform.position.x, target.transform.position.y, -25f);
+            Time.timeScale = 1f;
+            probandoCombinacion = false;
+            canvas.enabled = false; //Se desactiva el canvas  
             nivelActual++;
             textoCombinacion.text = "";
             NuevaCombinacion();                      
