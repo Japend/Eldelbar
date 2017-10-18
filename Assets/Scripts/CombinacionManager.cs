@@ -17,9 +17,6 @@ public class CombinacionManager : MonoBehaviour {
      *  SI ES INCORRECTO, INDICE A 0 Y TODOS SE APAGAN
      *  */
 
-    private float contadorSecs = 0;
-    public float maxContadorSecs = 0.5f;
-
     public String datos;
     public String port;
     public int frequency = 38400;
@@ -42,12 +39,13 @@ public class CombinacionManager : MonoBehaviour {
     public Text textoCombinacion;
 
 	// Use this for initialization
-	void Awake () {
+	void Start () {
         nivelActual = nivelInicial;        
         NuevaCombinacion();
 
         datos = "";
         stream = new SerialPort(port, frequency);
+        //stream.ReadBufferSize = 12;
         stream.Open();
 
         pines = new String[numFuentes];
@@ -62,16 +60,12 @@ public class CombinacionManager : MonoBehaviour {
 
     void Update()
     {
-        if (contadorSecs <= 0)
-        {
             datos = stream.ReadLine(); //Coge los datos del buffer
-            stream.BaseStream.Flush(); //Vacía el buffer
+            //stream.DiscardInBuffer();
+            stream.BaseStream.Flush();
             pines = ArduinoSplit(datos, separador); //Guarda en cada posición del array la distancia de cada ultrasonido           
 
             ComprobarCombinacion();
-            contadorSecs = maxContadorSecs;
-        }
-        contadorSecs -= Time.deltaTime;
     }
 
     private String[] ArduinoSplit(String cadenaDatos, char separador)
