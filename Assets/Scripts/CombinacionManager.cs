@@ -77,7 +77,7 @@ public class CombinacionManager : MonoBehaviour {
             canvas.enabled = true;
             probandoCombinacion = true;
             Time.timeScale = 0.2f;        
-            //PARAR UN DETERMINADO TIEMPO HASTA QUE SE HAGA LA COMBINACIÓN
+            //RALENTIZAR UN DETERMINADO TIEMPO HASTA QUE SE HAGA LA COMBINACIÓN
         }
         else canvas.enabled = false;
 
