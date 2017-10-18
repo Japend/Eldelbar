@@ -4,6 +4,8 @@ using UnityEngine;
 using System;
 using System.IO.Ports;
 using UnityEngine.UI;
+using System.Threading;
+
 
 public class CombinacionManager : MonoBehaviour {
 
@@ -43,6 +45,9 @@ public class CombinacionManager : MonoBehaviour {
 
     public Text textoCombinacion;
 
+    private Thread hilo;
+    bool stopThread = false;
+
 	// Use this for initialization
 	void Awake () {
 
@@ -51,9 +56,6 @@ public class CombinacionManager : MonoBehaviour {
         NuevaCombinacion();
 
         datos = "";
-        stream = new SerialPort(port, frequency);
-        //stream.ReadBufferSize = 12;
-        stream.Open();
 
         pines = new String[numFuentes];
         pinesActivos = new bool[numFuentes];
@@ -61,7 +63,9 @@ public class CombinacionManager : MonoBehaviour {
 
         for (int i = 0; i < pinesActivos.Length; i++) pinesActivos[i] = false;
         myRenderer = this.GetComponent<Renderer>();
-        
+
+        hilo = new Thread(funcionHiloUltrasonidos);
+        hilo.Start();        
     }
 
 
@@ -86,9 +90,6 @@ public class CombinacionManager : MonoBehaviour {
 
     void Update()
     {
-        datos = stream.ReadLine(); //Coge los datos del buffer
-        //stream.DiscardInBuffer();
-        stream.BaseStream.Flush();
         pines = ArduinoSplit(datos, separador); //Guarda en cada posición del array la distancia de cada ultrasonido           
 
         ComprobarCombinacion();
@@ -117,7 +118,19 @@ public class CombinacionManager : MonoBehaviour {
         return _pines;
     }
 
-    
+    public void funcionHiloUltrasonidos()
+    {
+        stream = new SerialPort(port, frequency);
+        stream.Open();
+
+        while(hilo.IsAlive && !stopThread)
+        {
+            datos = stream.ReadLine(); //Coge los datos del buffer
+            stream.DiscardInBuffer();
+            stream.BaseStream.Flush();
+
+        }
+    }
 
     void ComprobarCombinacion()
     {
@@ -184,6 +197,12 @@ public class CombinacionManager : MonoBehaviour {
     public static bool[] GetPinesActivos()
     {
         return pinesActivos;
+    }
+
+    void OnApplicationQuit()
+    {
+        Debug.Log("STOPPED");
+        stopThread = true;
     }
 
 
