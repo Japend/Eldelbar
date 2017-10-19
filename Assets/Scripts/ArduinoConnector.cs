@@ -4,6 +4,7 @@
 using UnityEngine;
 using System;
 using System.IO.Ports;
+using System.Threading;
 
 public class ArduinoConnector : MonoBehaviour
 {
@@ -13,25 +14,42 @@ public class ArduinoConnector : MonoBehaviour
     public String port;
     public int frequency;
 
+    private Thread hilo;
+    private bool killThrad;
+
     public void Start()
     {
+        hilo = new Thread(funcionHiloAcelerometro);
+        hilo.Start();
         // Opens the serial port
-        datos = "";
-        stream = new SerialPort(port, frequency);
-        stream.Open();
+        datos = "0.00,0.00|0";
+        
     }
 
     public void Update()
     {
 
         //Debug.Log(stream.ReadLine());
-        datos = stream.ReadLine();
-        stream.BaseStream.Flush();
+        
     }
 
 
-    public void Close()
+    public void OnApplicationQuit()
     {
+        killThrad = true;
+    }
+
+    private void funcionHiloAcelerometro()
+    {
+        stream = new SerialPort(port, frequency);
+        stream.Open();
+
+        while(!killThrad)
+        {
+            datos = stream.ReadLine();
+            stream.DiscardInBuffer();
+            stream.BaseStream.Flush();
+        }
         stream.Close();
     }
 }

@@ -44,9 +44,15 @@ public class CombinacionManager : MonoBehaviour {
     public bool[] acertados;
 
     public Text textoCombinacion;
+    public Text textoCombinacionTuya;
 
     private Thread hilo;
     bool stopThread = false;
+
+    public bool permitePulsar;
+    public float temp;
+    public float tiempoEntrePulsaciones = 0.15f;
+
 
 	// Use this for initialization
 	void Awake () {
@@ -56,6 +62,8 @@ public class CombinacionManager : MonoBehaviour {
         NuevaCombinacion();
 
         datos = "";
+        permitePulsar = true;
+        temp = 0;
 
         pines = new String[numFuentes];
         pinesActivos = new bool[numFuentes];
@@ -72,12 +80,13 @@ public class CombinacionManager : MonoBehaviour {
     void ComprobarParedVisible()
     {
         Vector3 screenPoint = camera.WorldToViewportPoint(target.transform.position);
-        bool onScreen = screenPoint.z > 0 && screenPoint.x > 0 && screenPoint.x < 1.1 && screenPoint.y > 0 && screenPoint.y < 1;
+        //bool onScreen = screenPoint.z > 0 && screenPoint.x > 0 && screenPoint.x < 1 && screenPoint.y > 0 && screenPoint.y < 1;
+        bool onScreen = target.position.z <= 155 && target.position.z >= 100;
 
         if (onScreen)
         {
             //target.GetComponent<Renderer>().material.color = Color.blue;
-            //Debug.Log("SE VE");
+            if(! canvas.isActiveAndEnabled) textoCombinacionTuya.text = ""; //Seguridad
             canvas.enabled = true;
             probandoCombinacion = true;
             Time.timeScale = 0.2f;        
@@ -92,7 +101,13 @@ public class CombinacionManager : MonoBehaviour {
     {
         pines = ArduinoSplit(datos, separador); //Guarda en cada posición del array la distancia de cada ultrasonido           
 
-        ComprobarCombinacion();
+        if (temp >= tiempoEntrePulsaciones)
+        {
+            ComprobarCombinacion();
+            temp = 0;
+        }
+        else temp += Time.deltaTime;
+
         ComprobarParedVisible();
     }
 
@@ -130,6 +145,7 @@ public class CombinacionManager : MonoBehaviour {
             stream.BaseStream.Flush();
 
         }
+        stream.Close();
     }
 
     void ComprobarCombinacion()
@@ -143,15 +159,17 @@ public class CombinacionManager : MonoBehaviour {
             //Si está activado, compruebo que sea el único (Si hay alguno activado salgo directamente, ya no me vale
             if (i != combinacion[indiceActual] && pinesActivos[i] == true)
             {
+                textoCombinacionTuya.text = "";
                 indiceActual = 0; //En el momento en que fallas, se reinicia
                 for (int a = 0; a < acertados.Length; a++) acertados[a] = false;
                 return;
             }
         }
 
-        if(pinesActivos[combinacion[indiceActual]] == true)
+        if(pinesActivos[combinacion[indiceActual]] == true) //ACIERTA UNO DE LOS NÚMEROS
         {
             acertados[indiceActual] = true;
+            textoCombinacionTuya.text += combinacion[indiceActual] + "  ";
             indiceActual++; //Se actualiza el índice
         }
         
@@ -177,7 +195,8 @@ public class CombinacionManager : MonoBehaviour {
         combinacion = new int[nivelActual]; //Tendrá que crearse un nuevo array a cada nivel
         acertados = new bool[nivelActual];
         indiceActual = 0; //Reinicia el índice
-        
+        textoCombinacionTuya.text = "";
+
 
         for (int i = 0; i<combinacion.Length; i++)
         {
