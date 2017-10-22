@@ -39,8 +39,10 @@ THE SOFTWARE.
 #include <SoftwareSerial.h>
 
 
-const int16_t OFFSET_GRAVEDAD = 8291;
+const int16_t ID_ACELEROMETRO = 0;
+const int16_t CICLOS_CALIBRACION = 1000;
 const float FACTOR_NORMALIZ = 8191;
+const float FACTOR_CALIBRADOR = 0.95; //este valor define la tolerancia del control de calibracion
 
 // Arduino Wire library is required if I2Cdev I2CDEV_ARDUINO_WIRE implementation
 // is used in I2Cdev.h
@@ -75,6 +77,10 @@ float girosc_ang_z, girosc_ang_y;
 float ang_z_prev, ang_y_prev;
 float accelX, accelY, accelZ; //guardan la aceleracion procesada en rango 2, -2
 float factor_gravedad_x, factor_gravedad_y, factor_gravedad_z; 
+
+//variables de calibracion
+long suma;
+int valorGravedad, contador;
 
 #ifdef MODO_FILTRO_COMPLEMENTO
   float angulo_z_filtro_comp, angulo_y_filtro_comp;
@@ -116,6 +122,9 @@ void setup() {
     //inicializa variables
     ang_z_prev = ang_y_prev = 0;
     #endif
+
+    suma = valorGravedad = 0;
+    contador = CICLOS_CALIBRACION;
 }
 
 void loop() {
@@ -123,39 +132,72 @@ void loop() {
     Serial.flush();
     // read raw accel/gyro measurements from device
     accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
-    
-    updateGiro();
-    rotacionAcelerometro();
-    procesarDatosAcelerometro();
-    //calcularFactoresGravedad();
-    
-        // display tab-separated accel/gyro x/y/z values
 
-        #ifdef MODO_FILTRO_COMPLEMENTO
-        filtroComplemento();
-        Serial.print(angulo_y_filtro_comp); Serial.print(",");
-        Serial.print(angulo_z_filtro_comp); Serial.print("|");
-        Serial.print(accelX); Serial.print(",");
-        Serial.print(accelY); Serial.print(",");
-        Serial.println(accelZ);
+    if(contador >= 0)
+    {
+      suma += ax;
 
-        #else
-          Serial.print("ANGULOS SIN FILTRO COMPEMENTO: \t")
-          Serial.print(ax); Serial.print(",");
-          Serial.print(accel_ang_y); Serial.print(",");
-          Serial.print(accel_ang_z); Serial.print(",");
-          Serial.print(girosc_ang_y); Serial.print(",");
-          Serial.println(girosc_ang_z);
-        //Serial.print(",");
-        //Serial.println(gz);
+      if(contador == 0)
+      {
+        valorGravedad = suma / CICLOS_CALIBRACION;
+        Serial.println(ID_ACELEROMETRO);
+      }
 
-    #endif
+      contador--;
+      
+    }
+
+    else
+    {
+      updateGiro();
+      rotacionAcelerometro();
+      procesarDatosAcelerometro();
+      //calcularFactoresGravedad();
+      
+          // display tab-separated accel/gyro x/y/z values
+
+      //CONTROL CALIBRADOR
+      /*
+       * SI LA ACELERACION EN EL EJE X ESTA LO SUFICIENTEMENTE CERCA DE DETERMINADO VALOR DADO POR EL VALOR MEDIO DE DICHO EJE CUANDO EL DISPOSITIVO HA SIDO CALIBRADO (AL INICIO)
+       * POR UN FACTOR DE CALIBRACION, LOS ANGULOS SE PONEN A 0, ELIMINANDO EL ERROR ACUMULADO HASTA EL MOMENTO
+       */
+
+       if(ax > valorGravedad * FACTOR_CALIBRADOR)
+        {
+            angulo_y_filtro_comp = 0;
+            angulo_z_filtro_comp = 0;
+            ang_y_prev = 0;
+            ang_z_prev = 0;
+        }
 
 
-    // blink LED to indicate activity
-    blinkState = !blinkState;
-    digitalWrite(LED_PIN, blinkState);
-    delay(100);
+        
+          #ifdef MODO_FILTRO_COMPLEMENTO
+          filtroComplemento();
+          Serial.print(angulo_y_filtro_comp); Serial.print(",");
+          Serial.print(-angulo_z_filtro_comp); Serial.print("|");
+          Serial.print(accelX); Serial.print(",");
+          Serial.print(accelY); Serial.print(",");
+          Serial.println(accelZ);
+  
+          #else
+            Serial.print("ANGULOS SIN FILTRO COMPEMENTO: \t")
+            Serial.print(ax); Serial.print(",");
+            Serial.print(accel_ang_y); Serial.print(",");
+            Serial.print(accel_ang_z); Serial.print(",");
+            Serial.print(girosc_ang_y); Serial.print(",");
+            Serial.println(girosc_ang_z);
+          //Serial.print(",");
+          //Serial.println(gz);
+  
+      #endif
+  
+  
+      // blink LED to indicate activity
+      blinkState = !blinkState;
+      digitalWrite(LED_PIN, blinkState);
+      delay(100);
+    }
 }
 
  /*Esta funcion calcula la rotacion en los ejes a partir de la informacion del acalerometro,
@@ -206,7 +248,7 @@ void loop() {
      dt = millis() - tiempo_prev;
      tiempo_prev = millis();
   
-     incremento_giroscopio_z = (gz / 131)*dt / 1000.0;
+     incremento_giroscopio_z = -(gz / 131)*dt / 1000.0;
      incremento_giroscopio_y = (gy / 131)*dt / 1000.0;
   }
   

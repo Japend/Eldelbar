@@ -143,7 +143,7 @@ public class Prueba : MonoBehaviour {
             Vector3 newDir = Vector3.RotateTowards(transform.forward, new Vector3(rotationX,0,rotationY), 3 * Time.deltaTime, 0.0F);
             player.transform.rotation = Quaternion.LookRotation(newDir);
         }*/
-        if (rotationY + rotYant < 2.5 && rotationY - rotYant > -2.5f) { rotYant = rotationY; rotationY = 0; }
+      //  if (rotationY + rotYant < 2.5 && rotationY - rotYant > -2.5f) { rotYant = rotationY; rotationY = 0; }
         rotXDatos[ciclo] = rotationX;
         rotYDatos[ciclo] = rotationY;
         float datosXcount = 0;
