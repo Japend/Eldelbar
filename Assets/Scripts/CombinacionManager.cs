@@ -23,8 +23,7 @@ public class CombinacionManager : MonoBehaviour {
     public static Transform target; //La pared de la puerta
     private Camera camera;
     public static bool probandoCombinacion;
-
-    public String datos;
+    public string datos;
     public String port;
     public int frequency = 38400;
     public Char separador = '_';
@@ -61,7 +60,7 @@ public class CombinacionManager : MonoBehaviour {
         nivelActual = nivelInicial;        
         NuevaCombinacion();
 
-        datos = "";
+        GlobalData.DatosUltrasonidos = "";
         permitePulsar = true;
         temp = 0;
 
@@ -99,7 +98,8 @@ public class CombinacionManager : MonoBehaviour {
 
     void Update()
     {
-        pines = ArduinoSplit(datos, separador); //Guarda en cada posición del array la distancia de cada ultrasonido           
+        datos = GlobalData.DatosUltrasonidos;
+        pines = ArduinoSplit(GlobalData.DatosUltrasonidos, separador); //Guarda en cada posición del array la distancia de cada ultrasonido           
 
         if (temp >= tiempoEntrePulsaciones)
         {
@@ -116,7 +116,7 @@ public class CombinacionManager : MonoBehaviour {
         String[] _pines = new String[numFuentes];
         int barras = 0;
 
-        foreach (char dato in cadenaDatos) //De esta forma se recorre solo una vez la cadena de Datos
+        foreach (char dato in cadenaDatos) //De esta forma se recorre solo una vez la cadena de GlobalData.DatosUltrasonidos
         {
             if (dato.Equals(separador)) //Ya ha acabado un número
             {
@@ -140,7 +140,7 @@ public class CombinacionManager : MonoBehaviour {
 
         while(hilo.IsAlive && !stopThread)
         {
-            datos = stream.ReadLine(); //Coge los datos del buffer
+            GlobalData.DatosUltrasonidos = stream.ReadLine(); //Coge los GlobalData.DatosUltrasonidos del buffer
             stream.DiscardInBuffer();
             stream.BaseStream.Flush();
 

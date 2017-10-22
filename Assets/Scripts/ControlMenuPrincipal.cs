@@ -9,56 +9,119 @@ public class ControlMenuPrincipal : MonoBehaviour {
 	private GameObject salir;
 	private GameObject calibrar;
 	private GameObject calibrando;
+    private GameObject puntuacion;
+    private GameObject logo;
+
+    private GeneradorObstaculos generadorObstaculos;
+
+    public string[] datos;
+    private bool[] bootonesPulsados;
 
 	int estadoAnterior;
 
 	void Awake () {
 		continuar = GameObject.Find ("Continuar");
+        puntuacion = GameObject.Find("Puntuacion");
 		empezar = GameObject.Find ("Empezar");
-		calibrar = GameObject.Find ("Calibrar");
+        logo = GameObject.Find("LogoMenu");
 		salir = GameObject.Find ("Salir");
 		calibrando = GameObject.Find ("Calibrando");
 		estadoAnterior = -1;  //para que se ejecute el switch la primera vez
+        bootonesPulsados = new bool[4];
+        generadorObstaculos = GameObject.Find("Generatron").GetComponent<GeneradorObstaculos>();
 	}
 		
 
 	void Update () {
 
-		if (estadoAnterior != DatosGlobales.EstadoJuego) {
-			estadoAnterior = DatosGlobales.EstadoJuego;
+        puntuacion.GetComponentInChildren<UnityEngine.UI.Text>().text = System.Convert.ToString(GlobalData.GetPuntuacion());
 
-			switch (DatosGlobales.EstadoJuego) {
+        datos = GlobalData.DatosUltrasonidos.Split('_');
 
-			case DatosGlobales.MENU_PRINCIPAL:
+        if(System.Convert.ToInt32(datos[0]) < 15)
+            bootonesPulsados[0] = true;
+        else
+            bootonesPulsados[0] = false;
+
+        if (System.Convert.ToInt32(datos[1]) < 15)
+            bootonesPulsados[1] = true;
+        else
+            bootonesPulsados[1] = false;
+
+        if (System.Convert.ToInt32(datos[2]) < 15)
+            bootonesPulsados[2] = true;
+        else
+            bootonesPulsados[2] = false;
+
+        if (System.Convert.ToInt32(datos[3]) < 15)
+            bootonesPulsados[3] = true;
+        else
+            bootonesPulsados[3] = false;
+
+
+        //acciones menu principal
+        if (GlobalData.EstadoJuego == GlobalData.MENU_PRINCIPAL)
+        {
+            if (bootonesPulsados[0])
+                GlobalData.EstadoJuego = GlobalData.JUGANDO;
+            else if (bootonesPulsados[3])
+                Application.Quit();
+        }
+
+        //acciones juego en curso
+        if (GlobalData.EstadoJuego == GlobalData.JUGANDO)
+        {
+            if (bootonesPulsados[0] && bootonesPulsados[3])
+                GlobalData.EstadoJuego = GlobalData.PAUSA;
+        }
+
+        if (GlobalData.EstadoJuego == GlobalData.PAUSA)
+        {
+            if (bootonesPulsados[1])
+                GlobalData.EstadoJuego = GlobalData.JUGANDO;
+            else if (bootonesPulsados[2])
+            {
+                generadorObstaculos.Reset();
+                GlobalData.ResetPuntuacion();
+                GlobalData.EstadoJuego = GlobalData.MENU_PRINCIPAL;
+            }
+        }
+
+
+		if (estadoAnterior != GlobalData.EstadoJuego) {
+            estadoAnterior = GlobalData.EstadoJuego;
+
+            switch (GlobalData.EstadoJuego)
+            {
+
+                case GlobalData.MENU_PRINCIPAL:
+                puntuacion.SetActive(false);
 				empezar.SetActive (true);
+                salir.GetComponentInChildren<UnityEngine.UI.Text>().text = "SALIR - 4";
 				salir.SetActive (true);
-				calibrar.SetActive (true);
+                logo.SetActive(true);
 				calibrando.SetActive (false);
-				continuar.SetActive (false);
-				Time.timeScale = 0;
+                continuar.SetActive(false);
+                Time.timeScale = 0f;
 				break;
 
-			case DatosGlobales.JUGANDO:
-				this.gameObject.GetComponent<Canvas> ().enabled = false;
-				Time.timeScale = 0;
+            case GlobalData.JUGANDO:
+                empezar.SetActive(false);
+                salir.SetActive(false);
+                logo.SetActive(false);
+                puntuacion.SetActive(true);
+				Time.timeScale = 1f;
 				break;
 
-			case DatosGlobales.PAUSA:
+            case GlobalData.PAUSA:
 				this.gameObject.GetComponent<Canvas> ().enabled = true;
 				empezar.SetActive (false);
+                salir.GetComponentInChildren<UnityEngine.UI.Text>().text = "SALIR - 3";
 				salir.SetActive (true);
-				calibrar.SetActive (true);
 				calibrando.SetActive (false);
+                logo.SetActive(true);
 				continuar.SetActive (true);
-				Time.timeScale = 0;
-				break;
-
-			case DatosGlobales.CALIBRANDO:
-				empezar.SetActive (false);
-				salir.SetActive (false);
-				calibrar.SetActive (false);
-				calibrando.SetActive (true);
-				continuar.SetActive (false);
+				Time.timeScale = 0f;
 				break;
 			}
 		}

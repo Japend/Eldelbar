@@ -112,17 +112,17 @@ public class CubeMovement : MonoBehaviour {
         rotationX = float.Parse(rotX);
         rotationY = float.Parse(rotY);
 
-        if (DatosGlobales.EstadoJuego == DatosGlobales.CALIBRANDO)
+       /* if (GlobalData.EstadoJuego == GlobalData.CALIBRANDO)
         {
             if (Calibrador.Calibrar(rotationX, rotationY, accelX))
-                DatosGlobales.EstadoJuego = DatosGlobales.PAUSA;
+                GlobalData.EstadoJuego = GlobalData.PAUSA;
         }
 
-        else if(DatosGlobales.EstadoJuego == DatosGlobales.JUGANDO)
-        {
+        else if (GlobalData.EstadoJuego == GlobalData.JUGANDO)
+        {*/
             Ajuste();
             Mover();
-        }
+       // }
 
 
     }

@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GlobalData {
+public static class GlobalData {
+
+    public const string ID_ACELEROMETRO = "0";
+    public const string ID_ULTRASONIDOS = "1";
 
 	public const int MENU_PRINCIPAL = 0;
 	public const int JUGANDO = 1;
 	public const int PAUSA = 2;
-	public const int CALIBRANDO = 3;
 	public const int FIN_DEL_JUEGO = 4;
 
 	public static int EstadoJuego = 0;
@@ -15,14 +17,20 @@ public class GlobalData {
 
 	private static int puntuacion = 0;
 
-	public static int IncrementarPuntuacion(int cantidad)
+	public static void IncrementarPuntuacion()
 	{
-		puntuacion += cantidad;
-		return puntuacion;
+        puntuacion++;
 	}
 
 	public static int GetPuntuacion()
 	{
 		return puntuacion;
 	}
+
+    public static void ResetPuntuacion()
+    {
+        puntuacion = 0;
+    }
+    public static string DatosGiroscopio;
+    public static string DatosUltrasonidos;
 }

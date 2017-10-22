@@ -58,7 +58,7 @@ public class GeneradorObstaculos : MonoBehaviour {
 	private const float TIEMPO_MAXIMO_ENTRE_OBSTACULOS = 3.0F;
     private const float TIEMPO_ENTRE_PUERTAS = 15;
 	private const float Z_INICIAL = 223;
-    private const float Z_FINAL = -25;
+    private const float Z_FINAL = 0;
 
 
 	public GameObject[][] obstaculosBase;
@@ -140,6 +140,7 @@ public class GeneradorObstaculos : MonoBehaviour {
         {
             obstaculosActivos.Remove(obstaculosParaBorrar[i]);
             obstaculosParaBorrar[i].usandose = false;
+            GlobalData.IncrementarPuntuacion();
             obstaculosParaBorrar[i].GetObject().SetActive(false);
         }
         obstaculosParaBorrar.Clear();
@@ -272,6 +273,20 @@ public class GeneradorObstaculos : MonoBehaviour {
     public void SetTiempoInicial(float time)
     {
         tiempoInicial = time;
+    }
+
+    public void Reset()
+    {
+        foreach (Obstaculo obj in obstaculosActivos)
+        {
+            obj.usandose = false;
+            obj.velocidad.z = 0;
+            obj.GetObject().SetActive(false);
+        }
+
+        tiempoRestanteAparicionNormal = Random.Range(TIEMPO_MAXIMO_ENTRE_OBSTACULOS, TIEMPO_MINIMO_ENTRE_OBSTACULOS);
+        tiempoRestanteAparicionPuertas = Random.Range(TIEMPO_ENTRE_PUERTAS * 0.8f, TIEMPO_ENTRE_PUERTAS * 1.2f);
+        cm.enabled = false;
     }
 
 }
