@@ -287,6 +287,7 @@ public class GeneradorObstaculos : MonoBehaviour {
         tiempoRestanteAparicionNormal = Random.Range(TIEMPO_MAXIMO_ENTRE_OBSTACULOS, TIEMPO_MINIMO_ENTRE_OBSTACULOS);
         tiempoRestanteAparicionPuertas = Random.Range(TIEMPO_ENTRE_PUERTAS * 0.8f, TIEMPO_ENTRE_PUERTAS * 1.2f);
         cm.enabled = false;
+        tiempoInicial = Time.time;
     }
 
 }

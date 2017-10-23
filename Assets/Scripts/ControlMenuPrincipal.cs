@@ -11,6 +11,9 @@ public class ControlMenuPrincipal : MonoBehaviour {
 	private GameObject calibrando;
     private GameObject puntuacion;
     private GameObject logo;
+    private GameObject puntuacionFinJuego;
+
+    private CombinacionManager cm;
 
     private GeneradorObstaculos generadorObstaculos;
 
@@ -29,6 +32,8 @@ public class ControlMenuPrincipal : MonoBehaviour {
 		estadoAnterior = -1;  //para que se ejecute el switch la primera vez
         bootonesPulsados = new bool[4];
         generadorObstaculos = GameObject.Find("Generatron").GetComponent<GeneradorObstaculos>();
+        puntuacionFinJuego = GameObject.Find("PuntuacionFinJuego");
+        cm = GameObject.Find("Main Camera").GetComponent<CombinacionManager>();
 	}
 		
 
@@ -81,12 +86,18 @@ public class ControlMenuPrincipal : MonoBehaviour {
                 GlobalData.EstadoJuego = GlobalData.JUGANDO;
             else if (bootonesPulsados[2])
             {
-                generadorObstaculos.Reset();
-                GlobalData.ResetPuntuacion();
+                reset();
                 GlobalData.EstadoJuego = GlobalData.MENU_PRINCIPAL;
             }
         }
 
+        if (GlobalData.EstadoJuego == GlobalData.FIN_DEL_JUEGO)
+        {
+            if (bootonesPulsados[1])
+                GlobalData.EstadoJuego = GlobalData.MENU_PRINCIPAL;
+            if (bootonesPulsados[3])
+                Application.Quit();
+        }
 
 		if (estadoAnterior != GlobalData.EstadoJuego) {
             estadoAnterior = GlobalData.EstadoJuego;
@@ -95,37 +106,59 @@ public class ControlMenuPrincipal : MonoBehaviour {
             {
 
                 case GlobalData.MENU_PRINCIPAL:
-                puntuacion.SetActive(false);
-				empezar.SetActive (true);
-                salir.GetComponentInChildren<UnityEngine.UI.Text>().text = "SALIR - 4";
-				salir.SetActive (true);
-                logo.SetActive(true);
-				calibrando.SetActive (false);
-                continuar.SetActive(false);
-                Time.timeScale = 0f;
-				break;
+                    puntuacionFinJuego.SetActive(false);
+                    puntuacion.SetActive(false);
+				    empezar.SetActive (true);
+                    salir.GetComponentInChildren<UnityEngine.UI.Text>().text = "SALIR - 4";
+				    salir.SetActive (true);
+                    logo.SetActive(true);
+				    calibrando.SetActive (true);
+                    continuar.SetActive(false);
+                    Time.timeScale = 0f;
+				    break;
 
-            case GlobalData.JUGANDO:
-                empezar.SetActive(false);
-                salir.SetActive(false);
-                logo.SetActive(false);
-                puntuacion.SetActive(true);
-				Time.timeScale = 1f;
-				break;
+                case GlobalData.JUGANDO:
+                    calibrando.SetActive(false);
+                    empezar.SetActive(false);
+                    salir.SetActive(false);
+                    logo.SetActive(false);
+                    continuar.SetActive(false);
+                    puntuacion.SetActive(true);
+				    Time.timeScale = 1f;
+				    break;
 
-            case GlobalData.PAUSA:
-				this.gameObject.GetComponent<Canvas> ().enabled = true;
-				empezar.SetActive (false);
-                salir.GetComponentInChildren<UnityEngine.UI.Text>().text = "SALIR - 3";
-				salir.SetActive (true);
-				calibrando.SetActive (false);
-                logo.SetActive(true);
-				continuar.SetActive (true);
-				Time.timeScale = 0f;
-				break;
+                case GlobalData.PAUSA:
+				    this.gameObject.GetComponent<Canvas> ().enabled = true;
+				    empezar.SetActive (false);
+                    salir.GetComponentInChildren<UnityEngine.UI.Text>().text = "SALIR - 3";
+				    salir.SetActive (true);
+				    calibrando.SetActive (true);
+                    logo.SetActive(true);
+				    continuar.SetActive (true);
+				    Time.timeScale = 0f;
+				    break;
+
+                case GlobalData.FIN_DEL_JUEGO:
+                    this.gameObject.GetComponent<Canvas>().enabled = true;
+                    empezar.SetActive (false);
+                    salir.GetComponentInChildren<UnityEngine.UI.Text>().text = "SALIR - 4";
+                    puntuacionFinJuego.GetComponent<UnityEngine.UI.Text>().text = "PUNUACIÓN FINAL: " + System.Convert.ToString(GlobalData.GetPuntuacion());
+                    puntuacionFinJuego.SetActive(true);
+                    continuar.SetActive (true);
+			        Time.timeScale = 0f;
+			        salir.SetActive (true);
+                    reset();
+                    break;
 			}
 		}
 
-		//codigo para leer ultrasonidos y modificar stado del juego
 	}
+
+    private void reset()
+    {
+        generadorObstaculos.Reset();
+        GlobalData.ResetPuntuacion();
+        Parallax3D.Reset();
+        cm.Reset();
+    }
 }

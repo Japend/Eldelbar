@@ -9,7 +9,7 @@ public class Parallax3D : MonoBehaviour {
     public Transform generador;
     public float offset, inrementoVelocidadConTiempo;
 
-    private float tiempoInicial;
+    private static float tiempoInicial;
 
     void Awake()
     {
@@ -27,5 +27,10 @@ public class Parallax3D : MonoBehaviour {
     public void SetTiempoInicial(float tiempo)
     {
         tiempoInicial = tiempo;
+    }
+
+    public static void Reset()
+    {
+        tiempoInicial = Time.time;
     }
 }

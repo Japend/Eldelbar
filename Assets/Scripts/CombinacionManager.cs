@@ -224,5 +224,10 @@ public class CombinacionManager : MonoBehaviour {
         stopThread = true;
     }
 
+    public void Reset()
+    {
+        nivelActual = 2;
+    }
+
 
 }
