@@ -21,8 +21,7 @@ public class Prueba : MonoBehaviour {
     private float[] rotXDatos = new float[5] { 0, 0, 0, 0, 0 };
     private float[] rotYDatos = new float[5] { 0, 0, 0, 0, 0 };
     private float[] accXDatos = new float[5] { 0, 0, 0, 0, 0 };
-    //private float[] accYDatos = new float[5] { 0, 0, 0, 0, 0 };
-    private float[] accZDatos = new float[5] { 0, 0, 0, 0, 0 };
+
     int ciclo = 0;
     float rotYant = 0f;
     string rotX = "";
@@ -87,26 +86,7 @@ public class Prueba : MonoBehaviour {
 
                         accX = accX + dato;
                     }
-                }/*
-                else if (comas == 1)
-                {
-
-                    if (dato.Equals(','))
-                    {
-
-                        comas++;
-                    }
-                    else
-                    {
-
-                        accY = accY + dato;
-                    }
                 }
-                else {
-
-                    accZ = accZ + dato;
-
-                }*/
             }
         }
 
@@ -128,7 +108,6 @@ public class Prueba : MonoBehaviour {
     private void Mover() {
 
         player.transform.localEulerAngles = new Vector3(rotationX, 0, rotationY);
-        //player.transform.Translate(-(rotationY/10f) * Time.deltaTime, -(rotationX/25f ) * Time.deltaTime, 0);
         
 
     }
@@ -138,12 +117,6 @@ public class Prueba : MonoBehaviour {
     private void Ajuste()
     {
         ciclo++;
-
-        /*if (accelX >= Calibrador.GetGravedad()*0.9) { rotationY = 0;
-            Vector3 newDir = Vector3.RotateTowards(transform.forward, new Vector3(rotationX,0,rotationY), 3 * Time.deltaTime, 0.0F);
-            player.transform.rotation = Quaternion.LookRotation(newDir);
-        }*/
-      //  if (rotationY + rotYant < 2.5 && rotationY - rotYant > -2.5f) { rotYant = rotationY; rotationY = 0; }
         rotXDatos[ciclo] = rotationX;
         rotYDatos[ciclo] = rotationY;
         float datosXcount = 0;
@@ -171,14 +144,14 @@ public class Prueba : MonoBehaviour {
         {
 
             
-            player.transform.position += Vector3.up * (-rotationX) * Time.deltaTime;
+            player.transform.position += Vector3.up * (-rotationX/5) * Time.deltaTime;
 
             Vector3 newDir = Vector3.RotateTowards(transform.forward, new Vector3(rotationX, 0, rotationY), 1000 * Time.deltaTime, 3F);
             player.transform.rotation = Quaternion.LookRotation(newDir);
         }
         else {
             rotationX = 0;
-            player.transform.position += Vector3.right * (-rotationY) * Time.deltaTime;
+            player.transform.position += Vector3.right * (-rotationY/5) * Time.deltaTime;
             Vector3 newDir = Vector3.RotateTowards(transform.forward, new Vector3(rotationX, 0, rotationY), 1000 * Time.deltaTime, 3F);
             player.transform.rotation = Quaternion.LookRotation(newDir);
         }
@@ -195,12 +168,17 @@ public class Prueba : MonoBehaviour {
         {
             player.transform.position = new Vector3(limitDer, player.transform.position.y, player.transform.position.z);
         }
-        else if (player.transform.position.x < limitInf)
+        else if (player.transform.position.x < limitIz)
         {
 
             player.transform.position = new Vector3(limitIz, player.transform.position.y, player.transform.position.z);
         }
     }
 
+    public void Resetear()
+    {
+        player.transform.localPosition= new Vector3(0, -0.5f,55.5f);
+        player.transform.localEulerAngles = new Vector3(0,0,0);
+    }
 
 }
