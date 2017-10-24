@@ -5,6 +5,7 @@ using UnityEngine;
 public class Prueba : MonoBehaviour {
 
     public GameObject player;
+    public GameObject jarra;
     public ArduinoConnector info;
     public float limitSup;
     public float limitInf;
@@ -13,9 +14,9 @@ public class Prueba : MonoBehaviour {
     private float rotationX;
     private float rotationY;
     private float accelX;
-    //private float accelY;
     private float accelZ;
-    public float speed = 1f;
+    private Vector3 posJar;
+    private Quaternion rotJar;
     private float accelation = 0.5f;
     private Vector3 accel;
     private float[] rotXDatos = new float[5] { 0, 0, 0, 0, 0 };
@@ -31,6 +32,13 @@ public class Prueba : MonoBehaviour {
     string accZ = "";
 
     // Update is called once per frame
+
+    private void Awake()
+    {
+        posJar = jarra.transform.localPosition;
+        rotJar = jarra.transform.localRotation;
+    }
+
     void Update() {
 
 
@@ -179,6 +187,8 @@ public class Prueba : MonoBehaviour {
     {
         player.transform.localPosition= new Vector3(0, -0.5f,55.5f);
         player.transform.localEulerAngles = new Vector3(0,0,0);
+        jarra.transform.localPosition = posJar;
+        jarra.transform.localRotation = rotJar;
     }
 
 }
