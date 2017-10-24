@@ -70,6 +70,8 @@ public class CombinacionManager : MonoBehaviour {
 
         for (int i = 0; i < pinesActivos.Length; i++) pinesActivos[i] = false;
         myRenderer = this.GetComponent<Renderer>();
+        canvas = GameObject.Find("CanvasCombinacion").GetComponent<Canvas>();
+        canvas.enabled = false;
 
         hilo = new Thread(funcionHiloUltrasonidos);
         hilo.Start();        
@@ -88,7 +90,9 @@ public class CombinacionManager : MonoBehaviour {
             if(! canvas.isActiveAndEnabled) textoCombinacionTuya.text = ""; //Seguridad
             canvas.enabled = true;
             probandoCombinacion = true;
-            Time.timeScale = 0.2f;        
+
+            if(Time.timeScale > 0.3f)
+                Time.timeScale = 0.2f;        
             //RALENTIZAR UN DETERMINADO TIEMPO HASTA QUE SE HAGA LA COMBINACIÓN
         }
         else canvas.enabled = false;

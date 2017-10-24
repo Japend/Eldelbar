@@ -14,7 +14,7 @@ public class ControlMenuPrincipal : MonoBehaviour {
     private GameObject puntuacionFinJuego;
 
     private CombinacionManager cm;
-
+    private Prueba bandeja;
     private GeneradorObstaculos generadorObstaculos;
 
     public string[] datos;
@@ -34,6 +34,7 @@ public class ControlMenuPrincipal : MonoBehaviour {
         generadorObstaculos = GameObject.Find("Generatron").GetComponent<GeneradorObstaculos>();
         puntuacionFinJuego = GameObject.Find("PuntuacionFinJuego");
         cm = GameObject.Find("Main Camera").GetComponent<CombinacionManager>();
+        bandeja = GameObject.Find("Bandeja").GetComponent<Prueba>();
 	}
 		
 
@@ -160,5 +161,6 @@ public class ControlMenuPrincipal : MonoBehaviour {
         GlobalData.ResetPuntuacion();
         Parallax3D.Reset();
         cm.Reset();
+        bandeja.Resetear();
     }
 }

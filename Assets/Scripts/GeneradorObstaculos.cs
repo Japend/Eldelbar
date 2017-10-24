@@ -56,7 +56,7 @@ public class GeneradorObstaculos : MonoBehaviour {
 
 	private const float TIEMPO_MINIMO_ENTRE_OBSTACULOS = 2.0F;
 	private const float TIEMPO_MAXIMO_ENTRE_OBSTACULOS = 3.0F;
-    private const float TIEMPO_ENTRE_PUERTAS = 15;
+    private const float TIEMPO_ENTRE_PUERTAS = 15f;
 	private const float Z_INICIAL = 223;
     private const float Z_FINAL = 0;
 
@@ -283,6 +283,7 @@ public class GeneradorObstaculos : MonoBehaviour {
             obj.velocidad.z = 0;
             obj.GetObject().SetActive(false);
         }
+        obstaculosActivos.Clear();
 
         tiempoRestanteAparicionNormal = Random.Range(TIEMPO_MAXIMO_ENTRE_OBSTACULOS, TIEMPO_MINIMO_ENTRE_OBSTACULOS);
         tiempoRestanteAparicionPuertas = Random.Range(TIEMPO_ENTRE_PUERTAS * 0.8f, TIEMPO_ENTRE_PUERTAS * 1.2f);
