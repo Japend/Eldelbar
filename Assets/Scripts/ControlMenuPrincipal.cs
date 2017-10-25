@@ -7,14 +7,13 @@ public class ControlMenuPrincipal : MonoBehaviour {
 	private GameObject continuar;
 	private GameObject empezar;
 	private GameObject salir;
-	private GameObject calibrar;
 	private GameObject calibrando;
     private GameObject puntuacion;
     private GameObject logo;
     private GameObject puntuacionFinJuego;
 
     private CombinacionManager cm;
-    private Prueba bandeja;
+    public Prueba bandeja;
     private GeneradorObstaculos generadorObstaculos;
 
     public string[] datos;
@@ -34,7 +33,7 @@ public class ControlMenuPrincipal : MonoBehaviour {
         generadorObstaculos = GameObject.Find("Generatron").GetComponent<GeneradorObstaculos>();
         puntuacionFinJuego = GameObject.Find("PuntuacionFinJuego");
         cm = GameObject.Find("Main Camera").GetComponent<CombinacionManager>();
-        bandeja = GameObject.Find("Bandeja").GetComponent<Prueba>();
+        //bandeja = GameObject.Find("Bandeja").GetComponent<Prueba>();
 	}
 		
 

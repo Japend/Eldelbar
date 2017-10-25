@@ -56,7 +56,7 @@ public class GeneradorObstaculos : MonoBehaviour {
 
 	private const float TIEMPO_MINIMO_ENTRE_OBSTACULOS = 2.0F;
 	private const float TIEMPO_MAXIMO_ENTRE_OBSTACULOS = 3.0F;
-    private const float TIEMPO_ENTRE_PUERTAS = 5f;
+    private const float TIEMPO_ENTRE_PUERTAS = 15f;
 	private const float Z_INICIAL = 223;
     private const float Z_FINAL = 0;
 
