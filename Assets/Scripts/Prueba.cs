@@ -45,7 +45,8 @@ public class Prueba : MonoBehaviour {
         int comas = 0;
         int separa = 0;
     
-
+        if(!jarra.GetComponent<Rigidbody>().isKinematic == false)
+            jarra.GetComponent<Rigidbody>().isKinematic = false;
         foreach (char dato in info.datos) {
             if (separa == 0) //Rotaciones
             {
@@ -189,6 +190,7 @@ public class Prueba : MonoBehaviour {
         player.transform.localEulerAngles = new Vector3(0,0,0);
         jarra.transform.localPosition = posJar;
         jarra.transform.localRotation = rotJar;
+        jarra.GetComponent<Rigidbody>().isKinematic = true;
     }
 
 }
