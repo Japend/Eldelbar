@@ -231,6 +231,8 @@ public class CombinacionManager : MonoBehaviour {
     public void Reset()
     {
         nivelActual = 2;
+        canvas.enabled = false;
+        
     }
 
 

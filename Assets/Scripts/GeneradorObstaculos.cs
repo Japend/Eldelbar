@@ -56,7 +56,7 @@ public class GeneradorObstaculos : MonoBehaviour {
 
 	private const float TIEMPO_MINIMO_ENTRE_OBSTACULOS = 2.0F;
 	private const float TIEMPO_MAXIMO_ENTRE_OBSTACULOS = 3.0F;
-    private const float TIEMPO_ENTRE_PUERTAS = 15f;
+    private const float TIEMPO_ENTRE_PUERTAS = 5f;
 	private const float Z_INICIAL = 223;
     private const float Z_FINAL = 0;
 
@@ -67,7 +67,8 @@ public class GeneradorObstaculos : MonoBehaviour {
 	List<Obstaculo> obstaculosActivos, obstaculosParaBorrar;
 	Obstaculo[][][] piscinaObstaculos;
 	float[] valoresFrontera;
-    float tiempoRestanteAparicionNormal, tiempoRestanteAparicionTipos23, tiempoRestanteAparicionPuertas;
+    float tiempoRestanteAparicionNormal, tiempoRestanteAparicionPuertas;
+    float tiempoRestanteAparicionTipo2, tiempoRestanteAparicionTipo3;
     CombinacionManager cm;
     float tiempoInicial;
 
@@ -91,7 +92,8 @@ public class GeneradorObstaculos : MonoBehaviour {
 		//generando piscina de obstaculos
 		generaPiscinaObstaculos();
 		tiempoRestanteAparicionNormal = TIEMPO_MAXIMO_ENTRE_OBSTACULOS;
-		tiempoRestanteAparicionTipos23 = TIEMPO_MAXIMO_ENTRE_OBSTACULOS * 2;
+        tiempoRestanteAparicionTipo2 = TIEMPO_MAXIMO_ENTRE_OBSTACULOS * 1.5f;
+		tiempoRestanteAparicionTipo3 = TIEMPO_MAXIMO_ENTRE_OBSTACULOS * 2;
         tiempoRestanteAparicionPuertas = TIEMPO_ENTRE_PUERTAS;
 
         //inicilizando variables
@@ -120,6 +122,20 @@ public class GeneradorObstaculos : MonoBehaviour {
             generarObstaculo(ESPECIALES);
             cm.enabled = true;
             tiempoRestanteAparicionPuertas = Random.Range(TIEMPO_ENTRE_PUERTAS * 0.8f, TIEMPO_ENTRE_PUERTAS * 1.2f);
+        }
+
+        tiempoRestanteAparicionTipo2 -= Time.deltaTime;
+        if (tiempoRestanteAparicionTipo2 <= 0)
+        {
+            generarObstaculo(RAPIDOS);
+            tiempoRestanteAparicionTipo2 = Random.Range(TIEMPO_MAXIMO_ENTRE_OBSTACULOS * 1.5f, TIEMPO_MINIMO_ENTRE_OBSTACULOS * 1.5f);
+        }
+
+        tiempoRestanteAparicionTipo3 -= Time.deltaTime;
+        if (tiempoRestanteAparicionTipo3 <= 0)
+        {
+            generarObstaculo(GRANDES);
+            tiempoRestanteAparicionTipo3 = Random.Range(TIEMPO_MAXIMO_ENTRE_OBSTACULOS * 2f, TIEMPO_MINIMO_ENTRE_OBSTACULOS * 2f);
         }
 	}
 
@@ -204,7 +220,7 @@ public class GeneradorObstaculos : MonoBehaviour {
 		//recorre la piscina correspondiente al obstaculo
 		bool ok = false;
 		int aux = 0;
-		Obstaculo seleccion;
+
 
 		while (!ok) {
 			aux = Random.Range(0, piscinaObstaculos[i].Length);
@@ -242,9 +258,13 @@ public class GeneradorObstaculos : MonoBehaviour {
     {
         obs.GetObject().SetActive(true);
 
-        if(tipo != ESPECIALES)
+        if (tipo != ESPECIALES)
             obs.GetObject().transform.position = new Vector3(Random.Range(valoresFrontera[X_MIN], valoresFrontera[X_MAX]),
                     Random.Range(valoresFrontera[Y_MIN], valoresFrontera[Y_MAX]), Z_INICIAL);
+        if (obs.GetTipo() == ESPECIALES)
+        {
+            obs.GetObject().transform.position = new Vector3(3.1f, 0, 240);
+        }
         obs.usandose = true;
 
 /*#if DEBUG
